@@ -27,5 +27,9 @@ public class Municipio {
         return departamento;
     }
 
+    @Override
+    public String toString() {
+    return nombre + " - " + departamento;
+}
 }
 
