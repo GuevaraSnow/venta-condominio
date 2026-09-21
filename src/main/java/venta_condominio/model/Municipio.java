@@ -31,5 +31,28 @@ public class Municipio {
     public String toString() {
     return nombre + " - " + departamento;
 }
+
+    @Override
+    public boolean equals(Object objeto) {
+
+        if (this == objeto) {
+            return true;
+        }
+
+        if (!(objeto instanceof Municipio)) {
+            return false;
+        }
+
+        Municipio otro = (Municipio) objeto;
+
+        return nombre.equals(otro.nombre)
+                && departamento == otro.departamento;
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(nombre, departamento);
+    }
+
 }
 
