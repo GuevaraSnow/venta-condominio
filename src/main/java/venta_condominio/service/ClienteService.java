@@ -60,10 +60,12 @@ public class ClienteService {
                 request.getNombre(),
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
+                request.getCedula(),
                 request.getEmail(),
                 request.getTelefono(),
                 request.getSalario(),
                 request.getPresupuesto(),
+                request.getTipoInmueble(),
                 request.getDepartamento(),
                 request.getMunicipio()
         );

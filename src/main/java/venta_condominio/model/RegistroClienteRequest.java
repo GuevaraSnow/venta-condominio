@@ -7,16 +7,17 @@ public class RegistroClienteRequest {
     private String nombre;
     private String primerApellido;
     private String segundoApellido;
+    private String cedula;
     private String email;
     private String telefono;
     private String contrasena;
     private BigDecimal salario;
     private BigDecimal presupuesto;
+    private String tipoInmueble;
     private Departamento departamento;
     private Municipio municipio;
 
-    public RegistroClienteRequest() {
-    }
+    public RegistroClienteRequest() {}
 
     public String getNombre() {
         return nombre;
@@ -28,6 +29,10 @@ public class RegistroClienteRequest {
 
     public String getSegundoApellido() {
         return segundoApellido;
+    }
+
+    public String getCedula() {
+        return cedula;
     }
 
     public String getEmail() {
@@ -48,6 +53,10 @@ public class RegistroClienteRequest {
 
     public BigDecimal getPresupuesto() {
         return presupuesto;
+    }
+
+    public String getTipoInmueble() {
+        return tipoInmueble;
     }
 
     public Departamento getDepartamento() {

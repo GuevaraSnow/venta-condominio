@@ -11,10 +11,12 @@ public class Cliente {
     private final String nombre;
     private final String primerApellido;
     private final String segundoApellido;
+    private final String cedula;
     private final String email;
     private final String telefono;
     private final BigDecimal salario;
     private final BigDecimal presupuesto;
+    private final String tipoInmueble;
     private final Departamento departamento;
     private final Municipio municipio;
 
@@ -23,10 +25,12 @@ public class Cliente {
             @JsonProperty("nombre") String nombre,
             @JsonProperty("primerApellido") String primerApellido,
             @JsonProperty("segundoApellido") String segundoApellido,
+            @JsonProperty("cedula") String cedula,
             @JsonProperty("email") String email,
             @JsonProperty("telefono") String telefono,
             @JsonProperty("salario") BigDecimal salario,
             @JsonProperty("presupuesto") BigDecimal presupuesto,
+            @JsonProperty("tipoInmueble") String tipoInmueble,
             @JsonProperty("departamento") Departamento departamento,
             @JsonProperty("municipio") Municipio municipio) {
 
@@ -34,10 +38,12 @@ public class Cliente {
                 nombre,
                 primerApellido,
                 segundoApellido,
+                cedula,
                 email,
                 telefono,
                 salario,
                 presupuesto,
+                tipoInmueble,
                 departamento,
                 municipio
         );
@@ -45,10 +51,12 @@ public class Cliente {
         this.nombre = nombre;
         this.primerApellido = primerApellido;
         this.segundoApellido = segundoApellido;
+        this.cedula = cedula;
         this.email = email;
         this.telefono = telefono;
         this.salario = salario;
         this.presupuesto = presupuesto;
+        this.tipoInmueble = tipoInmueble;
         this.departamento = departamento;
         this.municipio = municipio;
     }
@@ -63,6 +71,10 @@ public class Cliente {
 
     public String getSegundoApellido() {
         return segundoApellido;
+    }
+
+    public String getCedula() {
+        return cedula;
     }
 
     public String getEmail() {
@@ -81,6 +93,10 @@ public class Cliente {
         return presupuesto;
     }
 
+    public String getTipoInmueble() {
+        return tipoInmueble;
+    }
+
     public Departamento getDepartamento() {
         return departamento;
     }
@@ -88,14 +104,17 @@ public class Cliente {
     public Municipio getMunicipio() {
         return municipio;
     }
+
     private void validarDatos(
             String nombre,
             String primerApellido,
             String segundoApellido,
+            String cedula,
             String email,
             String telefono,
             BigDecimal salario,
             BigDecimal presupuesto,
+            String tipoInmueble,
             Departamento departamento,
             Municipio municipio) {
 
@@ -114,6 +133,12 @@ public class Cliente {
         if (segundoApellido == null || segundoApellido.isBlank()) {
             throw new ValidacionClienteException(
                     "El segundo apellido es obligatorio"
+            );
+        }
+
+        if (cedula == null || cedula.isBlank()) {
+            throw new ValidacionClienteException(
+                    "La cédula es obligatoria"
             );
         }
 
@@ -144,6 +169,12 @@ public class Cliente {
         if (presupuesto == null || presupuesto.compareTo(BigDecimal.ZERO) < 0) {
             throw new ValidacionClienteException(
                     "El presupuesto no puede ser menor que cero"
+            );
+        }
+
+        if (tipoInmueble == null || tipoInmueble.isBlank()) {
+            throw new ValidacionClienteException(
+                    "El tipo de inmueble es obligatorio"
             );
         }
 
