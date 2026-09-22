@@ -23,8 +23,6 @@ public class ClienteController {
 
         clienteService.registrarCliente(request);
 
-        return ResponseEntity.ok(
-                "Cliente registrado correctamente"
-        );
+        return ResponseEntity.ok("Cliente registrado correctamente");
     }
 }

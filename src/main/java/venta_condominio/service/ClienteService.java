@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 
 import venta_condominio.exception.UsuarioException;
 import venta_condominio.model.Cliente;
+import venta_condominio.model.Departamento;
+import venta_condominio.model.Municipio;
 import venta_condominio.model.RegistroClienteRequest;
 import venta_condominio.model.Rol;
 import venta_condominio.repository.ClienteRepositorio;
@@ -46,14 +48,9 @@ public class ClienteService {
             );
         }
 
-        String idUsuario = UUID.randomUUID().toString();
-
-        usuarioService.registrarUsuario(
-                idUsuario,
-                request.getNombre(),
-                request.getEmail(),
-                request.getContrasena(),
-                Rol.CLIENTE
+        Municipio municipio = new Municipio(
+                request.getMunicipio(),
+                request.getDepartamento()
         );
 
         Cliente cliente = new Cliente(
@@ -67,7 +64,17 @@ public class ClienteService {
                 request.getPresupuesto(),
                 request.getTipoInmueble(),
                 request.getDepartamento(),
-                request.getMunicipio()
+                municipio
+        );
+
+        String idUsuario = UUID.randomUUID().toString();
+
+        usuarioService.registrarUsuario(
+                idUsuario,
+                request.getNombre(),
+                request.getEmail(),
+                request.getContrasena(),
+                Rol.CLIENTE
         );
 
         clienteRepositorio.guardar(cliente);

@@ -15,7 +15,7 @@ public class RegistroClienteRequest {
     private BigDecimal presupuesto;
     private String tipoInmueble;
     private Departamento departamento;
-    private Municipio municipio;
+    private String municipio;
 
     public RegistroClienteRequest() {}
 
@@ -63,7 +63,7 @@ public class RegistroClienteRequest {
         return departamento;
     }
 
-    public Municipio getMunicipio() {
+    public String getMunicipio() {
         return municipio;
     }
 }
