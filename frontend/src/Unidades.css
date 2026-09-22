@@ -1,0 +1,96 @@
+/* =========================================================
+   AGREGA ESTO AL FINAL DE TU App.css
+   (estilos para el listado y detalle de unidades — F-02)
+   ========================================================= */
+
+.secondary-button {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.secondary-button:hover {
+    background: #eaeaea;
+}
+
+.error-text {
+    color: #c0392b;
+}
+
+.units-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.unit-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.unit-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.unit-badge {
+    background: #eafaf1;
+    color: #1e8449;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.unit-tipo {
+    color: #555;
+    margin: 0;
+}
+
+.unit-precio {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.unit-precio-grande {
+    font-weight: 700;
+    font-size: 1.6rem;
+    margin: 0.5rem 0;
+}
+
+.unit-ubicacion,
+.unit-specs {
+    color: #777;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.unit-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.unit-detail-grid label {
+    font-size: 0.8rem;
+    color: #888;
+    display: block;
+}
+
+.unit-detail-grid p {
+    margin: 0.15rem 0 0 0;
+    font-weight: 500;
+}

@@ -11,6 +11,7 @@ public class Usuario {
     private final String contrasena;
     private final Rol rol;
     private final boolean activo;
+    private final String fotoPerfil;
 
     @JsonCreator
     public Usuario(
@@ -19,7 +20,8 @@ public class Usuario {
             @JsonProperty("email") String email,
             @JsonProperty("contrasena") String contrasena,
             @JsonProperty("rol") Rol rol,
-            @JsonProperty("activo") boolean activo) {
+            @JsonProperty("activo") boolean activo,
+            @JsonProperty("fotoPerfil") String fotoPerfil) {
 
         this.id = id;
         this.nombre = nombre;
@@ -27,6 +29,7 @@ public class Usuario {
         this.contrasena = contrasena;
         this.rol = rol;
         this.activo = activo;
+        this.fotoPerfil = fotoPerfil;
     }
 
     public String getId() {
@@ -51,5 +54,13 @@ public class Usuario {
 
     public boolean isActivo() {
         return activo;
+    }
+
+    public String getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public Usuario conFotoPerfil(String nuevaFoto) {
+        return new Usuario(id, nombre, email, contrasena, rol, activo, nuevaFoto);
     }
 }
