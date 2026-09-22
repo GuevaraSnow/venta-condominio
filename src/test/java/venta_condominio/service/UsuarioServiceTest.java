@@ -16,7 +16,24 @@ class UsuarioServiceTest {
     void debeRegistrarUsuario() {
 
         UsuarioRepositorio repositorio = new RepositorioEnMemoria();
-        UsuarioService service = new UsuarioService(repositorio);
+        VerificacionEmailService verificacionEmailService =
+                new VerificacionEmailService();
+
+        UsuarioService service =
+                new UsuarioService(
+                        repositorio,
+                        verificacionEmailService
+                );
+
+        String codigo =
+                verificacionEmailService.generarCodigo(
+                        "santiago@gmail.com"
+                );
+
+        verificacionEmailService.verificarCodigo(
+                "santiago@gmail.com",
+                codigo
+        );
 
         service.registrarUsuario(
                 "USR-001",
@@ -26,7 +43,8 @@ class UsuarioServiceTest {
                 Rol.CLIENTE
         );
 
-        Usuario usuario = repositorio.buscarPorEmail("santiago@gmail.com");
+        Usuario usuario =
+                repositorio.buscarPorEmail("santiago@gmail.com");
 
         assertNotNull(usuario);
         assertEquals("Santiago", usuario.getNombre());
@@ -35,10 +53,52 @@ class UsuarioServiceTest {
     }
 
     @Test
+    void noDebeRegistrarClienteSinVerificarCorreo() {
+
+        UsuarioRepositorio repositorio = new RepositorioEnMemoria();
+        VerificacionEmailService verificacionEmailService =
+                new VerificacionEmailService();
+
+        UsuarioService service =
+                new UsuarioService(
+                        repositorio,
+                        verificacionEmailService
+                );
+
+        assertThrows(
+                RuntimeException.class,
+                () -> service.registrarUsuario(
+                        "USR-001",
+                        "Santiago",
+                        "santiago@gmail.com",
+                        "123456",
+                        Rol.CLIENTE
+                )
+        );
+    }
+
+    @Test
     void noDebeRegistrarDosUsuariosConElMismoEmail() {
 
         UsuarioRepositorio repositorio = new RepositorioEnMemoria();
-        UsuarioService service = new UsuarioService(repositorio);
+        VerificacionEmailService verificacionEmailService =
+                new VerificacionEmailService();
+
+        UsuarioService service =
+                new UsuarioService(
+                        repositorio,
+                        verificacionEmailService
+                );
+
+        String codigo =
+                verificacionEmailService.generarCodigo(
+                        "santiago@gmail.com"
+                );
+
+        verificacionEmailService.verificarCodigo(
+                "santiago@gmail.com",
+                codigo
+        );
 
         service.registrarUsuario(
                 "USR-001",
@@ -60,9 +120,11 @@ class UsuarioServiceTest {
         );
     }
 
-    private static class RepositorioEnMemoria implements UsuarioRepositorio {
+    private static class RepositorioEnMemoria
+            implements UsuarioRepositorio {
 
-        private final List<Usuario> usuarios = new ArrayList<>();
+        private final List<Usuario> usuarios =
+                new ArrayList<>();
 
         @Override
         public void guardar(Usuario usuario) {
@@ -78,7 +140,9 @@ class UsuarioServiceTest {
         public Usuario buscarPorEmail(String email) {
 
             for (Usuario usuario : usuarios) {
-                if (usuario.getEmail().equalsIgnoreCase(email)) {
+                if (usuario.getEmail()
+                        .equalsIgnoreCase(email)) {
+
                     return usuario;
                 }
             }
@@ -88,8 +152,10 @@ class UsuarioServiceTest {
 
         @Override
         public void eliminar(String email) {
+
             usuarios.removeIf(usuario ->
-                    usuario.getEmail().equalsIgnoreCase(email)
+                    usuario.getEmail()
+                            .equalsIgnoreCase(email)
             );
         }
     }
