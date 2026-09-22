@@ -94,3 +94,94 @@
     margin: 0.15rem 0 0 0;
     font-weight: 500;
 }
+
+/* =========================================================
+   Panel con pestañas por rol (post-login)
+   ========================================================= */
+
+.panel-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    padding: 0.6rem 1rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-button-activo {
+    color: #1e8449;
+    border-bottom: 2px solid #1e8449;
+}
+
+.tab-button-salir {
+    margin-left: auto;
+    color: #c0392b;
+}
+
+/* =========================================================
+   Mi perfil (F: foto de perfil)
+   ========================================================= */
+
+.profile-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+}
+
+.profile-photo-wrapper {
+    margin-top: 0.5rem;
+}
+
+.profile-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+}
+
+.profile-photo-vacia {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 0.85rem;
+    background: #f5f5f5;
+}
+
+.profile-upload-label {
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+}
+
+.profile-info-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.profile-info-grid label {
+    font-size: 0.8rem;
+    color: #888;
+    display: block;
+}
+
+.profile-info-grid p {
+    margin: 0.15rem 0 0 0;
+    font-weight: 500;
+}

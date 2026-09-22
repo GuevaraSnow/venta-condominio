@@ -34,19 +34,65 @@ public class Cliente {
             @JsonProperty("departamento") Departamento departamento,
             @JsonProperty("municipio") Municipio municipio) {
 
-        validarDatos(
-                nombre,
-                primerApellido,
-                segundoApellido,
-                cedula,
-                email,
-                telefono,
-                salario,
-                presupuesto,
-                tipoInmueble,
-                departamento,
-                municipio
-        );
+        if (nombre == null || nombre.isBlank()) {
+            throw new ValidacionClienteException("El nombre es obligatorio");
+        }
+
+        if (primerApellido == null || primerApellido.isBlank()) {
+            throw new ValidacionClienteException("El primer apellido es obligatorio");
+        }
+
+        if (segundoApellido == null || segundoApellido.isBlank()) {
+            throw new ValidacionClienteException("El segundo apellido es obligatorio");
+        }
+
+        if (cedula == null || cedula.isBlank()) {
+            throw new ValidacionClienteException("La cédula es obligatoria");
+        }
+
+        if (email == null || email.isBlank()) {
+            throw new ValidacionClienteException("El correo electrónico es obligatorio");
+        }
+
+        if (telefono == null || telefono.isBlank()) {
+            throw new ValidacionClienteException("El teléfono es obligatorio");
+        }
+
+        if (telefono.length() != 10) {
+            throw new ValidacionClienteException(
+                    "El teléfono debe tener 10 dígitos"
+            );
+        }
+
+        if (salario == null || salario.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ValidacionClienteException(
+                    "El salario no puede ser negativo"
+            );
+        }
+
+        if (presupuesto == null || presupuesto.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ValidacionClienteException(
+                    "El presupuesto no puede ser negativo"
+            );
+        }
+
+        if (tipoInmueble == null || tipoInmueble.isBlank()) {
+            throw new ValidacionClienteException(
+                    "El tipo de inmueble es obligatorio"
+            );
+        }
+
+        if (departamento == null) {
+            throw new ValidacionClienteException(
+                    "El departamento es obligatorio"
+            );
+        }
+
+        if (municipio == null) {
+            throw new ValidacionClienteException(
+                    "El municipio es obligatorio"
+            );
+        }
 
         this.nombre = nombre;
         this.primerApellido = primerApellido;
@@ -103,91 +149,5 @@ public class Cliente {
 
     public Municipio getMunicipio() {
         return municipio;
-    }
-
-    private void validarDatos(
-            String nombre,
-            String primerApellido,
-            String segundoApellido,
-            String cedula,
-            String email,
-            String telefono,
-            BigDecimal salario,
-            BigDecimal presupuesto,
-            String tipoInmueble,
-            Departamento departamento,
-            Municipio municipio) {
-
-        if (nombre == null || nombre.isBlank()) {
-            throw new ValidacionClienteException(
-                    "El nombre es obligatorio"
-            );
-        }
-
-        if (primerApellido == null || primerApellido.isBlank()) {
-            throw new ValidacionClienteException(
-                    "El primer apellido es obligatorio"
-            );
-        }
-
-        if (segundoApellido == null || segundoApellido.isBlank()) {
-            throw new ValidacionClienteException(
-                    "El segundo apellido es obligatorio"
-            );
-        }
-
-        if (cedula == null || cedula.isBlank()) {
-            throw new ValidacionClienteException(
-                    "La cédula es obligatoria"
-            );
-        }
-
-        if (email == null || email.isBlank()) {
-            throw new ValidacionClienteException(
-                    "El correo electrónico es obligatorio"
-            );
-        }
-
-        if (telefono == null || telefono.isBlank()) {
-            throw new ValidacionClienteException(
-                    "El teléfono es obligatorio"
-            );
-        }
-
-        if (telefono.length() != 10) {
-            throw new ValidacionClienteException(
-                    "El teléfono debe tener exactamente 10 caracteres"
-            );
-        }
-
-        if (salario == null || salario.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ValidacionClienteException(
-                    "El salario no puede ser menor que cero"
-            );
-        }
-
-        if (presupuesto == null || presupuesto.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ValidacionClienteException(
-                    "El presupuesto no puede ser menor que cero"
-            );
-        }
-
-        if (tipoInmueble == null || tipoInmueble.isBlank()) {
-            throw new ValidacionClienteException(
-                    "El tipo de inmueble es obligatorio"
-            );
-        }
-
-        if (departamento == null) {
-            throw new ValidacionClienteException(
-                    "El departamento es obligatorio"
-            );
-        }
-
-        if (municipio == null) {
-            throw new ValidacionClienteException(
-                    "El municipio es obligatorio"
-            );
-        }
     }
 }

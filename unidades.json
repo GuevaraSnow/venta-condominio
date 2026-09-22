@@ -1,0 +1,15 @@
+[ {
+  "identificador" : "Apartamento 01",
+  "tipoInmueble" : "APARTAMENTO",
+  "precioLista" : 225000000,
+  "area" : 80,
+  "habitaciones" : 4,
+  "banos" : 2,
+  "descripcion" : "Cerca al parque",
+  "departamento" : "QUINDIO",
+  "municipio" : {
+    "nombre" : "Circasia",
+    "departamento" : "QUINDIO"
+  },
+  "estado" : "DISPONIBLE"
+} ]

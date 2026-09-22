@@ -1,16 +1,15 @@
 package venta_condominio.service;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 import venta_condominio.exception.UsuarioException;
 import venta_condominio.model.Cliente;
-import venta_condominio.model.Departamento;
 import venta_condominio.model.Municipio;
 import venta_condominio.model.RegistroClienteRequest;
 import venta_condominio.model.Rol;
 import venta_condominio.repository.ClienteRepositorio;
-
-import java.util.UUID;
 
 @Service
 public class ClienteService {
@@ -39,10 +38,7 @@ public class ClienteService {
             );
         }
 
-        Cliente clienteExistente =
-                clienteRepositorio.buscarPorEmail(email);
-
-        if (clienteExistente != null) {
+        if (clienteRepositorio.buscarPorEmail(email) != null) {
             throw new UsuarioException(
                     "Ya existe un cliente registrado con ese correo"
             );

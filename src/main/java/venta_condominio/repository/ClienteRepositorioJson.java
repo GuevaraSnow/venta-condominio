@@ -1,12 +1,13 @@
 package venta_condominio.repository;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import venta_condominio.model.Cliente;
@@ -42,21 +43,45 @@ public class ClienteRepositorioJson implements ClienteRepositorio {
     @Override
     public List<Cliente> listar() {
 
-        try {
-            File archivo = new File(rutaArchivo);
+        File archivo = new File(rutaArchivo);
 
-            if (!archivo.exists()) {
-                return new ArrayList<>();
+        if (!archivo.exists()) {
+            return new ArrayList<>();
+        }
+
+        List<Cliente> clientes = new ArrayList<>();
+
+        try {
+            JsonNode raiz = objectMapper.readTree(archivo);
+
+            if (raiz == null || !raiz.isArray()) {
+                return clientes;
             }
 
-            Cliente[] clientes = objectMapper.readValue(
-                    archivo,
-                    Cliente[].class
-            );
+            int indice = 0;
 
-            return new ArrayList<>(Arrays.asList(clientes));
+            for (JsonNode nodoCliente : raiz) {
 
-        } catch (Exception e) {
+                try {
+                    Cliente cliente = objectMapper.treeToValue(nodoCliente, Cliente.class);
+                    clientes.add(cliente);
+
+                } catch (Exception errorRegistro) {
+                    // Un registro corrupto o incompleto no debe tumbar
+                    // la lectura de todos los demás clientes.
+                    System.err.println(
+                            "Se omitió el registro #" + indice + " de " + rutaArchivo
+                                    + " por estar corrupto/incompleto: "
+                                    + errorRegistro.getMessage()
+                    );
+                }
+
+                indice++;
+            }
+
+            return clientes;
+
+        } catch (IOException e) {
             throw new RuntimeException("No se pudieron cargar los clientes", e);
         }
     }

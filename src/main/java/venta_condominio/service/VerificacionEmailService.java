@@ -2,10 +2,10 @@ package venta_condominio.service;
 
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 @Service
@@ -14,21 +14,39 @@ public class VerificacionEmailService {
     private final Map<String, String> codigos = new HashMap<>();
     private final Set<String> correosVerificados = new HashSet<>();
 
-    public String generarCodigo(String email) {
+    private final ServicioEnvioEmail servicioEnvioEmail;
+
+    public VerificacionEmailService(
+            ServicioEnvioEmail servicioEnvioEmail) {
+
+        this.servicioEnvioEmail = servicioEnvioEmail;
+    }
+
+    public void generarCodigo(String email) {
+
+        String emailNormalizado = email.trim().toLowerCase();
 
         String codigo = String.format(
                 "%06d",
-                new Random().nextInt(1_000_000)
+                new SecureRandom().nextInt(1_000_000)
         );
 
-        codigos.put(email.toLowerCase(), codigo);
+        codigos.put(emailNormalizado, codigo);
 
-        return codigo;
+        servicioEnvioEmail.enviarNotificacion(
+                emailNormalizado,
+                "Código de verificación - Venta Condominio",
+                "Hola.\n\n"
+                        + "Tu código de verificación para Venta Condominio es:\n\n"
+                        + codigo
+                        + "\n\n"
+                        + "Este código es necesario para completar el registro."
+        );
     }
 
     public boolean verificarCodigo(String email, String codigo) {
 
-        String emailNormalizado = email.toLowerCase();
+        String emailNormalizado = email.trim().toLowerCase();
 
         String codigoGuardado = codigos.get(emailNormalizado);
 
@@ -49,7 +67,13 @@ public class VerificacionEmailService {
     public boolean estaVerificado(String email) {
 
         return correosVerificados.contains(
-                email.toLowerCase()
+                email.trim().toLowerCase()
+        );
+    }
+    void marcarComoVerificado(String email) {
+
+        correosVerificados.add(
+                email.trim().toLowerCase()
         );
     }
 }

@@ -9,15 +9,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class UsuarioServiceTest {
 
     @Test
     void debeRegistrarUsuario() {
 
-        UsuarioRepositorio repositorio = new RepositorioEnMemoria();
+        UsuarioRepositorio repositorio =
+                new RepositorioEnMemoria();
+
+        ServicioEnvioEmail servicioEnvioEmail =
+                mock(ServicioEnvioEmail.class);
+
         VerificacionEmailService verificacionEmailService =
-                new VerificacionEmailService();
+                new VerificacionEmailService(
+                        servicioEnvioEmail
+                );
 
         UsuarioService service =
                 new UsuarioService(
@@ -25,14 +33,12 @@ class UsuarioServiceTest {
                         verificacionEmailService
                 );
 
-        String codigo =
-                verificacionEmailService.generarCodigo(
-                        "santiago@gmail.com"
-                );
+        verificacionEmailService.generarCodigo(
+                "santiago@gmail.com"
+        );
 
-        verificacionEmailService.verificarCodigo(
-                "santiago@gmail.com",
-                codigo
+        verificacionEmailService.marcarComoVerificado(
+                "santiago@gmail.com"
         );
 
         service.registrarUsuario(
@@ -44,7 +50,9 @@ class UsuarioServiceTest {
         );
 
         Usuario usuario =
-                repositorio.buscarPorEmail("santiago@gmail.com");
+                repositorio.buscarPorEmail(
+                        "santiago@gmail.com"
+                );
 
         assertNotNull(usuario);
         assertEquals("Santiago", usuario.getNombre());
@@ -55,9 +63,16 @@ class UsuarioServiceTest {
     @Test
     void noDebeRegistrarClienteSinVerificarCorreo() {
 
-        UsuarioRepositorio repositorio = new RepositorioEnMemoria();
+        UsuarioRepositorio repositorio =
+                new RepositorioEnMemoria();
+
+        ServicioEnvioEmail servicioEnvioEmail =
+                mock(ServicioEnvioEmail.class);
+
         VerificacionEmailService verificacionEmailService =
-                new VerificacionEmailService();
+                new VerificacionEmailService(
+                        servicioEnvioEmail
+                );
 
         UsuarioService service =
                 new UsuarioService(
@@ -80,9 +95,16 @@ class UsuarioServiceTest {
     @Test
     void noDebeRegistrarDosUsuariosConElMismoEmail() {
 
-        UsuarioRepositorio repositorio = new RepositorioEnMemoria();
+        UsuarioRepositorio repositorio =
+                new RepositorioEnMemoria();
+
+        ServicioEnvioEmail servicioEnvioEmail =
+                mock(ServicioEnvioEmail.class);
+
         VerificacionEmailService verificacionEmailService =
-                new VerificacionEmailService();
+                new VerificacionEmailService(
+                        servicioEnvioEmail
+                );
 
         UsuarioService service =
                 new UsuarioService(
@@ -90,14 +112,12 @@ class UsuarioServiceTest {
                         verificacionEmailService
                 );
 
-        String codigo =
-                verificacionEmailService.generarCodigo(
-                        "santiago@gmail.com"
-                );
+        verificacionEmailService.generarCodigo(
+                "santiago@gmail.com"
+        );
 
-        verificacionEmailService.verificarCodigo(
-                "santiago@gmail.com",
-                codigo
+        verificacionEmailService.marcarComoVerificado(
+                "santiago@gmail.com"
         );
 
         service.registrarUsuario(

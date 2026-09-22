@@ -25,13 +25,12 @@ public class VerificacionEmailController {
 
         String email = datos.get("email");
 
-        String codigo =
-                verificacionEmailService.generarCodigo(email);
+        verificacionEmailService.generarCodigo(email);
 
         return ResponseEntity.ok(
                 Map.of(
-                        "mensaje", "Código generado correctamente",
-                        "codigo", codigo
+                        "mensaje",
+                        "Código de verificación enviado al correo electrónico"
                 )
         );
     }
