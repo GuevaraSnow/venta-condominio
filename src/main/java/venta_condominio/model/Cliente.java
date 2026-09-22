@@ -2,6 +2,8 @@ package venta_condominio.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import venta_condominio.exception.ValidacionClienteException;
 
 public class Cliente {
@@ -16,16 +18,17 @@ public class Cliente {
     private final Departamento departamento;
     private final Municipio municipio;
 
+    @JsonCreator
     public Cliente(
-            String nombre,
-            String primerApellido,
-            String segundoApellido,
-            String email,
-            String telefono,
-            BigDecimal salario,
-            BigDecimal presupuesto,
-            Departamento departamento,
-            Municipio municipio) {
+            @JsonProperty("nombre") String nombre,
+            @JsonProperty("primerApellido") String primerApellido,
+            @JsonProperty("segundoApellido") String segundoApellido,
+            @JsonProperty("email") String email,
+            @JsonProperty("telefono") String telefono,
+            @JsonProperty("salario") BigDecimal salario,
+            @JsonProperty("presupuesto") BigDecimal presupuesto,
+            @JsonProperty("departamento") Departamento departamento,
+            @JsonProperty("municipio") Municipio municipio) {
 
         validarDatos(
                 nombre,
@@ -50,6 +53,41 @@ public class Cliente {
         this.municipio = municipio;
     }
 
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getPrimerApellido() {
+        return primerApellido;
+    }
+
+    public String getSegundoApellido() {
+        return segundoApellido;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public BigDecimal getSalario() {
+        return salario;
+    }
+
+    public BigDecimal getPresupuesto() {
+        return presupuesto;
+    }
+
+    public Departamento getDepartamento() {
+        return departamento;
+    }
+
+    public Municipio getMunicipio() {
+        return municipio;
+    }
     private void validarDatos(
             String nombre,
             String primerApellido,

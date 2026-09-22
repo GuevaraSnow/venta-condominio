@@ -1,11 +1,17 @@
 package venta_condominio.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Municipio {
 
     private final String nombre;
     private final Departamento departamento;
 
-    public Municipio(String nombre, Departamento departamento) {
+    @JsonCreator
+    public Municipio(
+            @JsonProperty("nombre") String nombre,
+            @JsonProperty("departamento") Departamento departamento) {
 
         if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException("El nombre del municipio es obligatorio");
