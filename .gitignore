@@ -39,3 +39,7 @@ out/
 # Archivos de persistencia local
 clientes.json
 usuarios.json
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
