@@ -1,0 +1,477 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  background: #f4f6fb;
+  color: #20242d;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+
+/* =========================================
+   CONTENEDOR PRINCIPAL
+========================================= */
+
+.app-container {
+  min-height: 100vh;
+  background:
+          linear-gradient(
+                  135deg,
+                  #eef2ff 0%,
+                  #f7f8fc 50%,
+                  #eef3ff 100%
+          );
+}
+
+
+/* =========================================
+   BARRA SUPERIOR
+========================================= */
+
+.topbar {
+  height: 76px;
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 42px;
+
+  border-bottom: 1px solid #e7eaf0;
+
+  position: relative;
+  z-index: 10;
+}
+
+
+/* Logo */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-img {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.brand-name {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.brand-name strong {
+  font-size: 20px;
+  font-weight: 750;
+  color: #263238;
+}
+
+.brand-name span {
+  font-size: 20px;
+  font-weight: 500;
+  color: #3157e8;
+}
+
+
+/* Texto superior */
+
+.topbar-info {
+  color: #7b8290;
+  font-size: 13px;
+}
+
+
+/* =========================================
+   CONTENIDO
+========================================= */
+
+.main-content {
+  min-height: calc(100vh - 76px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 45px 20px;
+}
+
+
+/* =========================================
+   TARJETA LOGIN
+========================================= */
+
+.auth-card {
+  width: 100%;
+  max-width: 500px;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  padding: 38px 42px;
+
+  box-shadow:
+          0 15px 45px rgba(38, 52, 100, 0.10);
+
+  border: 1px solid #edf0f6;
+}
+
+
+/* =========================================
+   CABECERA
+========================================= */
+
+.auth-header {
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+.auth-icon {
+  width: 55px;
+  height: 55px;
+
+  margin: 0 auto 13px;
+
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #eef2ff;
+}
+
+.auth-icon img {
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.auth-header h1 {
+  font-size: 23px;
+  font-weight: 750;
+
+  color: #252a35;
+
+  margin-bottom: 6px;
+}
+
+.auth-header p {
+  font-size: 13px;
+  color: #89909d;
+}
+
+
+/* =========================================
+   FORMULARIO
+========================================= */
+
+.auth-form h2 {
+  font-size: 22px;
+  color: #252a35;
+
+  margin-bottom: 6px;
+}
+
+.form-description {
+  color: #858c99;
+  font-size: 13px;
+
+  margin-bottom: 25px;
+}
+
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  margin-bottom: 17px;
+}
+
+.input-group label {
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #555d6b;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+
+  height: 44px;
+
+  border: 1px solid #dfe3ea;
+
+  border-radius: 8px;
+
+  padding: 0 13px;
+
+  font-size: 14px;
+
+  color: #303641;
+
+  background: #ffffff;
+
+  outline: none;
+
+  transition: all 0.2s ease;
+}
+
+.input-group input::placeholder {
+  color: #a4aab4;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #3157e8;
+
+  box-shadow:
+          0 0 0 3px rgba(49, 87, 232, 0.09);
+}
+
+.input-group select:disabled {
+  background: #f5f6f8;
+  color: #a1a6af;
+}
+
+
+/* =========================================
+   LOGIN
+========================================= */
+
+.forgot-password {
+  text-align: right;
+
+  margin-top: -5px;
+  margin-bottom: 20px;
+}
+
+.forgot-password button {
+  background: none;
+  border: none;
+
+  color: #3157e8;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+.forgot-password button:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   BOTÓN PRINCIPAL
+========================================= */
+
+.primary-button {
+  width: 100%;
+
+  height: 45px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #3157e8;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 650;
+
+  transition: all 0.2s ease;
+
+  box-shadow:
+          0 5px 12px rgba(49, 87, 232, 0.18);
+}
+
+.primary-button:hover {
+  background: #2648ca;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+          0 7px 16px rgba(49, 87, 232, 0.23);
+}
+
+
+/* =========================================
+   SEPARADOR
+========================================= */
+
+.separator {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin: 25px 0;
+
+  color: #a2a8b2;
+
+  font-size: 12px;
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+
+  height: 1px;
+
+  flex: 1;
+
+  background: #e8ebef;
+}
+
+
+/* =========================================
+   CREAR CUENTA
+========================================= */
+
+.register-question {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 5px;
+
+  font-size: 13px;
+
+  color: #858c99;
+}
+
+.register-question button {
+  border: none;
+  background: none;
+
+  color: #3157e8;
+
+  font-weight: 650;
+}
+
+.register-question button:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   REGISTRO
+========================================= */
+
+.register-form {
+  max-width: 100%;
+}
+
+.form-top {
+  margin-bottom: 10px;
+}
+
+.back-button {
+  border: none;
+  background: none;
+
+  color: #3157e8;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  padding: 0;
+}
+
+.back-button:hover {
+  text-decoration: underline;
+}
+
+
+/* Dos columnas */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  column-gap: 15px;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .topbar {
+    height: 65px;
+
+    padding: 0 20px;
+  }
+
+  .topbar-info {
+    display: none;
+  }
+
+  .brand-name strong,
+  .brand-name span {
+    font-size: 17px;
+  }
+
+  .auth-card {
+    padding: 30px 24px;
+
+    border-radius: 14px;
+  }
+
+  .main-content {
+    padding: 25px 15px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: span 1;
+  }
+
+}
