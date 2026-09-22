@@ -1,17 +1,14 @@
 package venta_condominio.controller;
 
-import java.math.BigDecimal;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import venta_condominio.model.Cliente;
-import venta_condominio.model.Departamento;
-import venta_condominio.model.Municipio;
+import venta_condominio.model.RegistroClienteRequest;
 import venta_condominio.service.ClienteService;
 
 @RestController
 @RequestMapping("/clientes")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ClienteController {
 
     private final ClienteService clienteService;
@@ -21,20 +18,13 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<String> registrarCliente(@RequestBody Cliente cliente) {
+    public ResponseEntity<String> registrarCliente(
+            @RequestBody RegistroClienteRequest request) {
 
-        clienteService.registrarCliente(
-                cliente.getNombre(),
-                cliente.getPrimerApellido(),
-                cliente.getSegundoApellido(),
-                cliente.getEmail(),
-                cliente.getTelefono(),
-                cliente.getSalario(),
-                cliente.getPresupuesto(),
-                cliente.getDepartamento(),
-                cliente.getMunicipio()
+        clienteService.registrarCliente(request);
+
+        return ResponseEntity.ok(
+                "Cliente registrado correctamente"
         );
-
-        return ResponseEntity.ok("Cliente registrado correctamente");
     }
 }
