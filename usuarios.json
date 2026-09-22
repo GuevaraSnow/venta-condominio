@@ -1,0 +1,15 @@
+[ {
+  "id" : "USR-001",
+  "nombre" : "Santiago",
+  "email" : "santiago@gmail.com",
+  "contrasena" : "123456",
+  "rol" : "CLIENTE",
+  "activo" : true
+}, {
+  "id" : "USR-001",
+  "nombre" : "Santiago",
+  "email" : "santiago@gmail.com",
+  "contrasena" : "123456",
+  "rol" : "CLIENTE",
+  "activo" : true
+} ]
