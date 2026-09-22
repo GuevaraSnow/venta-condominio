@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import venta_condominio.model.Rol;
 import venta_condominio.model.Usuario;
 import venta_condominio.repository.UsuarioRepositorio;
+import venta_condominio.exception.UsuarioException;
 
 @Service
 public class UsuarioService {
@@ -25,7 +26,7 @@ public class UsuarioService {
                 usuarioRepositorio.buscarPorEmail(email);
 
         if (usuarioExistente != null) {
-            throw new RuntimeException(
+            throw new UsuarioException(
                     "Ya existe un usuario registrado con ese correo"
             );
         }

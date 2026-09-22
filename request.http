@@ -1,17 +1,12 @@
-POST http://localhost:8080/clientes
+### Registrar usuario nuevo
+POST http://localhost:8080/usuarios
 Content-Type: application/json
 
 {
-  "nombre": "Santiago",
-  "primerApellido": "Guevara",
-  "segundoApellido": "Gómez",
-  "email": "santiago@gmail.com",
-  "telefono": "3001234567",
-  "salario": 3000000,
-  "presupuesto": 150000000,
-  "departamento": "QUINDIO",
-  "municipio": {
-    "nombre": "Armenia",
-    "departamento": "QUINDIO"
-  }
+  "id": "USR-002",
+  "nombre": "Carlos",
+  "email": "carlos@gmail.com",
+  "contrasena": "123456",
+  "rol": "CLIENTE",
+  "activo": true
 }
