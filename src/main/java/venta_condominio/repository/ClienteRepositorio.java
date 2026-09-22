@@ -10,4 +10,5 @@ public interface ClienteRepositorio {
 
     List<Cliente> listar();
 
+    Cliente buscarPorEmail(String email);
 }
