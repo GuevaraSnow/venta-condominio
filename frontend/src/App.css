@@ -475,3 +475,245 @@ button {
   }
 
 }
+
+
+/* =========================================================
+   AGREGADO PARA EL PANEL POST-LOGIN, UNIDADES Y PERFIL
+   (fusión de unidades.css dentro de tu App.css original)
+   ========================================================= */
+
+.secondary-button {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #dfe3ea;
+  background: #f5f6f8;
+  cursor: pointer;
+  font-weight: 600;
+  color: #303641;
+}
+
+.secondary-button:hover {
+  background: #eaeaea;
+}
+
+.error-text {
+  color: #c0392b;
+}
+
+/* ---- Panel con pestañas por rol ---- */
+
+.panel-view {
+  width: 100%;
+}
+
+.panel-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e7eaf0;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 0.6rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: #7b8290;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button-activo {
+  color: #3157e8;
+  border-bottom: 2px solid #3157e8;
+}
+
+.tab-button-salir {
+  margin-left: auto;
+  color: #c0392b;
+}
+
+/* ---- Listado de unidades ---- */
+
+.units-view {
+  width: 100%;
+}
+
+.units-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.unit-card {
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: #ffffff;
+}
+
+.unit-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.unit-badge {
+  background: #eafaf1;
+  color: #1e8449;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.unit-tipo {
+  color: #7b8290;
+  margin: 0;
+}
+
+.unit-precio {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+  color: #20242d;
+}
+
+.unit-precio-grande {
+  font-weight: 700;
+  font-size: 1.6rem;
+  margin: 0.5rem 0;
+  color: #20242d;
+}
+
+.unit-ubicacion,
+.unit-specs {
+  color: #858c99;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ---- Ficha técnica / detalle de unidad ---- */
+
+.unit-detail-view {
+  width: 100%;
+}
+
+.unit-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.unit-detail-grid label {
+  font-size: 0.8rem;
+  color: #858c99;
+  display: block;
+}
+
+.unit-detail-grid p {
+  margin: 0.15rem 0 0 0;
+  font-weight: 600;
+  color: #20242d;
+}
+
+/* ---- Fotos de unidades (VC-38) ---- */
+
+.unit-card-foto {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.unit-card-foto-vacia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a4aab4;
+  font-size: 0.85rem;
+  background: #f5f6f8;
+}
+
+.unit-gallery {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+
+.unit-gallery-foto {
+  width: 140px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+/* ---- Mi perfil ---- */
+
+.profile-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  width: 100%;
+}
+
+.profile-photo-wrapper {
+  margin-top: 0.5rem;
+}
+
+.profile-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e7eaf0;
+}
+
+.profile-photo-vacia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a4aab4;
+  font-size: 0.85rem;
+  background: #f5f6f8;
+}
+
+.profile-upload-label {
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+}
+
+.profile-info-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.profile-info-grid label {
+  font-size: 0.8rem;
+  color: #858c99;
+  display: block;
+}
+
+.profile-info-grid p {
+  margin: 0.15rem 0 0 0;
+  font-weight: 600;
+  color: #20242d;
+}

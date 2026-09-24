@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import venta_condominio.exception.ValidacionUnidadException;
+import venta_condominio.model.FotoPerfilRequest;
 import venta_condominio.model.Unidad;
 import venta_condominio.service.UnidadService;
 
@@ -63,6 +65,28 @@ public class UnidadController {
                             "mensaje", e.getMessage(),
                             "tipo", e.getClass().getSimpleName()
                     )
+            );
+        }
+    }
+
+    @PostMapping("/{identificador}/fotos")
+    public ResponseEntity<?> agregarFoto(
+            @PathVariable String identificador,
+            @RequestBody FotoPerfilRequest request) {
+
+        try {
+            Unidad actualizada = unidadService.agregarFoto(identificador, request.getFoto());
+
+            return ResponseEntity.ok(Map.of(
+                    "mensaje", "Foto agregada correctamente",
+                    "identificador", actualizada.getIdentificador(),
+                    "fotos", actualizada.getFotos()
+            ));
+
+        } catch (ValidacionUnidadException e) {
+
+            return ResponseEntity.badRequest().body(
+                    Map.of("mensaje", e.getMessage())
             );
         }
     }

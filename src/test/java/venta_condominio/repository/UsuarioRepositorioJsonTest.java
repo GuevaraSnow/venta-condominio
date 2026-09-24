@@ -19,7 +19,8 @@ class UsuarioRepositorioJsonTest {
                 "santiago@gmail.com",
                 "123456",
                 Rol.CLIENTE,
-                true
+                true,
+                null
         );
 
         repositorio.guardar(usuario);

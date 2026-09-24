@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import venta_condominio.exception.ValidacionUnidadException;
 import venta_condominio.model.EstadoUnidad;
 import venta_condominio.model.Unidad;
 import venta_condominio.repository.UnidadRepositorio;
@@ -31,5 +32,24 @@ public class UnidadService {
 
     public void registrarUnidad(Unidad unidad) {
         unidadRepositorio.guardar(unidad);
+    }
+
+    public Unidad agregarFoto(String identificador, String fotoBase64) {
+
+        Unidad unidad = unidadRepositorio.buscarPorIdentificador(identificador);
+
+        if (unidad == null) {
+            throw new ValidacionUnidadException("No se encontró la unidad " + identificador);
+        }
+
+        if (fotoBase64 == null || fotoBase64.isBlank()) {
+            throw new ValidacionUnidadException("La foto es obligatoria");
+        }
+
+        Unidad actualizada = unidad.conFotoAgregada(fotoBase64);
+
+        unidadRepositorio.actualizar(actualizada);
+
+        return actualizada;
     }
 }

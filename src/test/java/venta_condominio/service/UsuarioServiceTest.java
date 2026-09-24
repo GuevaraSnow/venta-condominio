@@ -171,6 +171,28 @@ class UsuarioServiceTest {
         }
 
         @Override
+        public Usuario buscarPorId(String id) {
+
+            for (Usuario usuario : usuarios) {
+                if (usuario.getId().equals(id)) {
+                    return usuario;
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public void actualizar(Usuario usuario) {
+
+            usuarios.removeIf(u ->
+                    u.getId().equals(usuario.getId())
+            );
+
+            usuarios.add(usuario);
+        }
+
+        @Override
         public void eliminar(String email) {
 
             usuarios.removeIf(usuario ->
