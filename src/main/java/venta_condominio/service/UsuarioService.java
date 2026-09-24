@@ -5,6 +5,7 @@ import venta_condominio.exception.UsuarioException;
 import venta_condominio.model.Rol;
 import venta_condominio.model.Usuario;
 import venta_condominio.repository.UsuarioRepositorio;
+import venta_condominio.util.GuardadorArchivos;
 
 @Service
 public class UsuarioService {
@@ -92,7 +93,9 @@ public class UsuarioService {
             throw new UsuarioException("La foto es obligatoria");
         }
 
-        Usuario actualizado = usuario.conFotoPerfil(fotoBase64);
+        String rutaFoto = GuardadorArchivos.guardarImagenBase64(fotoBase64, "perfiles");
+
+        Usuario actualizado = usuario.conFotoPerfil(rutaFoto);
 
         usuarioRepositorio.actualizar(actualizado);
 
