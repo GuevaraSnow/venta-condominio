@@ -6,13 +6,13 @@ const PESTANAS_POR_ROL = {
   ASESOR_COMERCIAL: ["unidades", "perfil"],
   ABOGADO: ["unidades", "perfil"],
   DIRECTOR_COMERCIAL: ["unidades", "crear", "perfil"],
-  ADMINISTRADOR_CONJUNTO: ["unidades", "crear", "perfil"]
+  ADMINISTRADOR_CONJUNTO: ["unidades", "crear", "perfil"],
 };
 
 const ETIQUETAS_PESTANA = {
   unidades: "Unidades disponibles",
   crear: "Crear unidad",
-  perfil: "Mi perfil"
+  perfil: "Mi perfil",
 };
 
 function App() {
@@ -33,7 +33,7 @@ function App() {
     presupuesto: "",
     tipoInmueble: "",
     departamento: "",
-    municipio: ""
+    municipio: "",
   });
 
   // =========================================================
@@ -45,6 +45,10 @@ function App() {
   const [errorUnidades, setErrorUnidades] = useState("");
   const [unidadSeleccionada, setUnidadSeleccionada] = useState(null);
 
+  // Filtros del listado (VC-39)
+  const [filtroDepartamento, setFiltroDepartamento] = useState("");
+  const [filtroTipo, setFiltroTipo] = useState("");
+
   const [formUnidad, setFormUnidad] = useState({
     identificador: "",
     tipoInmueble: "",
@@ -54,7 +58,7 @@ function App() {
     banos: "",
     descripcion: "",
     departamento: "",
-    municipio: ""
+    municipio: "",
   });
 
   const departamentos = {
@@ -65,28 +69,12 @@ function App() {
       "Montenegro",
       "Quimbaya",
       "Salento",
-      "Filandia"
+      "Filandia",
     ],
-    RISARALDA: [
-      "Pereira",
-      "Dosquebradas",
-      "Santa Rosa de Cabal"
-    ],
-    CALDAS: [
-      "Manizales",
-      "Chinchiná",
-      "Villamaría"
-    ],
-    ANTIOQUIA: [
-      "Medellín",
-      "Envigado",
-      "Bello"
-    ],
-    VALLE_DEL_CAUCA: [
-      "Cali",
-      "Palmira",
-      "Buga"
-    ]
+    RISARALDA: ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
+    CALDAS: ["Manizales", "Chinchiná", "Villamaría"],
+    ANTIOQUIA: ["Medellín", "Envigado", "Bello"],
+    VALLE_DEL_CAUCA: ["Cali", "Palmira", "Buga"],
   };
 
   const manejarCambio = (evento) => {
@@ -95,7 +83,7 @@ function App() {
     setFormulario((anterior) => ({
       ...anterior,
       [name]: value,
-      ...(name === "departamento" ? { municipio: "" } : {})
+      ...(name === "departamento" ? { municipio: "" } : {}),
     }));
   };
 
@@ -105,7 +93,7 @@ function App() {
     setFormUnidad((anterior) => ({
       ...anterior,
       [name]: value,
-      ...(name === "departamento" ? { municipio: "" } : {})
+      ...(name === "departamento" ? { municipio: "" } : {}),
     }));
   };
 
@@ -123,7 +111,7 @@ function App() {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(numero);
   };
 
@@ -132,7 +120,7 @@ function App() {
 
     setFormulario((anterior) => ({
       ...anterior,
-      [name]: value.replace(/\D/g, "")
+      [name]: value.replace(/\D/g, ""),
     }));
   };
 
@@ -141,7 +129,7 @@ function App() {
 
     setFormUnidad((anterior) => ({
       ...anterior,
-      [name]: value.replace(/\D/g, "")
+      [name]: value.replace(/\D/g, ""),
     }));
   };
 
@@ -153,33 +141,27 @@ function App() {
     evento.preventDefault();
 
     try {
-      const respuesta = await fetch(
-          "http://localhost:8080/usuarios/login",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              email: formulario.email,
-              contrasena: formulario.contrasena
-            })
-          }
-      );
+      const respuesta = await fetch("http://localhost:8080/usuarios/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formulario.email,
+          contrasena: formulario.contrasena,
+        }),
+      });
 
       const datos = await respuesta.json();
 
       if (!respuesta.ok) {
-        alert(
-            datos.mensaje || "Correo o contraseña incorrectos"
-        );
+        alert(datos.mensaje || "Correo o contraseña incorrectos");
         return;
       }
 
       setUsuarioActual(datos);
 
-      const pestanasDisponibles =
-          PESTANAS_POR_ROL[datos.rol] || ["unidades"];
+      const pestanasDisponibles = PESTANAS_POR_ROL[datos.rol] || ["unidades"];
 
       setPestanaActiva(pestanasDisponibles[0]);
       setVista("panel");
@@ -187,7 +169,6 @@ function App() {
       if (pestanasDisponibles.includes("unidades")) {
         await cargarUnidadesDisponibles();
       }
-
     } catch (error) {
       console.error(error);
       alert("No se pudo conectar con el servidor");
@@ -200,7 +181,7 @@ function App() {
     setFormulario((anterior) => ({
       ...anterior,
       email: "",
-      contrasena: ""
+      contrasena: "",
     }));
   };
 
@@ -217,32 +198,26 @@ function App() {
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              email: formulario.email
-            })
-          }
+              email: formulario.email,
+            }),
+          },
       );
 
       const datos = await respuesta.json();
 
       if (!respuesta.ok) {
-        alert(
-            datos.mensaje ||
-            "No se pudo generar el código"
-        );
+        alert(datos.mensaje || "No se pudo generar el código");
         return;
       }
 
       setVista("verificacion");
-
     } catch (error) {
       console.error(error);
 
-      alert(
-          "No se pudo conectar con el servidor"
-      );
+      alert("No se pudo conectar con el servidor");
     }
   };
 
@@ -262,24 +237,23 @@ function App() {
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               email: formulario.email,
-              codigo: codigoVerificacion
-            })
-          }
+              codigo: codigoVerificacion,
+            }),
+          },
       );
 
-      const datosVerificacion =
-          await respuestaVerificacion.json();
+      const datosVerificacion = await respuestaVerificacion.json();
 
       console.log("RESPUESTA VERIFICACIÓN:", datosVerificacion);
 
       if (!respuestaVerificacion.ok) {
         alert(
             datosVerificacion.mensaje ||
-            "El código de verificación es incorrecto"
+            "El código de verificación es incorrecto",
         );
 
         return;
@@ -297,35 +271,31 @@ function App() {
         presupuesto: Number(formulario.presupuesto),
         tipoInmueble: formulario.tipoInmueble,
         departamento: formulario.departamento,
-        municipio: formulario.municipio
+        municipio: formulario.municipio,
       });
 
-      const respuestaCliente = await fetch(
-          "http://localhost:8080/clientes",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              nombre: formulario.nombre,
-              primerApellido: formulario.primerApellido,
-              segundoApellido: formulario.segundoApellido,
-              cedula: formulario.cedula,
-              email: formulario.email,
-              telefono: formulario.telefono,
-              contrasena: formulario.contrasena,
-              salario: Number(formulario.salario),
-              presupuesto: Number(formulario.presupuesto),
-              tipoInmueble: formulario.tipoInmueble,
-              departamento: formulario.departamento,
-              municipio: formulario.municipio
-            })
-          }
-      );
+      const respuestaCliente = await fetch("http://localhost:8080/clientes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: formulario.nombre,
+          primerApellido: formulario.primerApellido,
+          segundoApellido: formulario.segundoApellido,
+          cedula: formulario.cedula,
+          email: formulario.email,
+          telefono: formulario.telefono,
+          contrasena: formulario.contrasena,
+          salario: Number(formulario.salario),
+          presupuesto: Number(formulario.presupuesto),
+          tipoInmueble: formulario.tipoInmueble,
+          departamento: formulario.departamento,
+          municipio: formulario.municipio,
+        }),
+      });
 
-      const textoCliente =
-          await respuestaCliente.text();
+      const textoCliente = await respuestaCliente.text();
 
       let datosCliente = {};
 
@@ -334,7 +304,7 @@ function App() {
           datosCliente = JSON.parse(textoCliente);
         } catch {
           datosCliente = {
-            mensaje: textoCliente
+            mensaje: textoCliente,
           };
         }
       }
@@ -343,7 +313,7 @@ function App() {
         console.error(
             "Error al registrar cliente:",
             respuestaCliente.status,
-            JSON.stringify(datosCliente)
+            JSON.stringify(datosCliente),
         );
 
         alert(
@@ -351,26 +321,20 @@ function App() {
                 datosCliente.mensaje ||
                 textoCliente ||
                 "No se pudo registrar el cliente"
-            }`
+            }`,
         );
 
         return;
       }
 
-      alert(
-          datosCliente.mensaje ||
-          "Cliente registrado correctamente"
-      );
+      alert(datosCliente.mensaje || "Cliente registrado correctamente");
 
       setVista("login");
       setCodigoVerificacion("");
-
     } catch (error) {
       console.error(error);
 
-      alert(
-          "No se pudo conectar con el servidor"
-      );
+      alert("No se pudo conectar con el servidor");
     }
   };
 
@@ -384,25 +348,21 @@ function App() {
 
     try {
       const respuesta = await fetch(
-          "http://localhost:8080/unidades/disponibles"
+          "http://localhost:8080/unidades/disponibles",
       );
 
       if (!respuesta.ok) {
-        throw new Error(
-            "El servidor respondió con estado " + respuesta.status
-        );
+        throw new Error("El servidor respondió con estado " + respuesta.status);
       }
 
       const datos = await respuesta.json();
 
       setUnidades(datos);
-
     } catch (error) {
       console.error(error);
       setErrorUnidades(
-          "No se pudieron cargar las unidades disponibles. Verifica que el backend esté corriendo."
+          "No se pudieron cargar las unidades disponibles. Verifica que el backend esté corriendo.",
       );
-
     } finally {
       setCargandoUnidades(false);
     }
@@ -427,37 +387,32 @@ function App() {
     evento.preventDefault();
 
     try {
-      const respuesta = await fetch(
-          "http://localhost:8080/unidades",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              identificador: formUnidad.identificador,
-              tipoInmueble: formUnidad.tipoInmueble,
-              precioLista: Number(formUnidad.precioLista),
-              area: Number(formUnidad.area),
-              habitaciones: Number(formUnidad.habitaciones),
-              banos: Number(formUnidad.banos),
-              descripcion: formUnidad.descripcion,
-              departamento: formUnidad.departamento,
-              municipio: {
-                nombre: formUnidad.municipio,
-                departamento: formUnidad.departamento
-              },
-              estado: "DISPONIBLE"
-            })
-          }
-      );
+      const respuesta = await fetch("http://localhost:8080/unidades", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identificador: formUnidad.identificador,
+          tipoInmueble: formUnidad.tipoInmueble,
+          precioLista: Number(formUnidad.precioLista),
+          area: Number(formUnidad.area),
+          habitaciones: Number(formUnidad.habitaciones),
+          banos: Number(formUnidad.banos),
+          descripcion: formUnidad.descripcion,
+          departamento: formUnidad.departamento,
+          municipio: {
+            nombre: formUnidad.municipio,
+            departamento: formUnidad.departamento,
+          },
+          estado: "DISPONIBLE",
+        }),
+      });
 
       const datos = await respuesta.json();
 
       if (!respuesta.ok) {
-        alert(
-            datos.mensaje || "No se pudo crear la unidad"
-        );
+        alert(datos.mensaje || "No se pudo crear la unidad");
         return;
       }
 
@@ -472,12 +427,11 @@ function App() {
         banos: "",
         descripcion: "",
         departamento: "",
-        municipio: ""
+        municipio: "",
       });
 
       await cargarUnidadesDisponibles();
       setPestanaActiva("unidades");
-
     } catch (error) {
       console.error(error);
       alert("No se pudo conectar con el servidor");
@@ -487,6 +441,77 @@ function App() {
   const pestanasDelUsuario = usuarioActual
       ? PESTANAS_POR_ROL[usuarioActual.rol] || ["unidades"]
       : [];
+
+  // Filtrado en el cliente: ya tenemos todas las disponibles cargadas
+  const unidadesFiltradas = unidades.filter((unidad) => {
+    const coincideDepartamento =
+        !filtroDepartamento || unidad.departamento === filtroDepartamento;
+
+    const coincideTipo = !filtroTipo || unidad.tipoInmueble === filtroTipo;
+
+    return coincideDepartamento && coincideTipo;
+  });
+
+  // =========================================================
+  // FOTOS DE UNIDAD (VC-38, solo Director comercial / Administrador)
+  // =========================================================
+
+  const [subiendoFotoUnidad, setSubiendoFotoUnidad] = useState(false);
+
+  const manejarCambioFotoUnidad = (evento) => {
+    const archivo = evento.target.files?.[0];
+
+    if (!archivo || !unidadSeleccionada) return;
+
+    const lector = new FileReader();
+
+    lector.onload = async () => {
+      const fotoBase64 = lector.result;
+
+      setSubiendoFotoUnidad(true);
+
+      try {
+        const respuesta = await fetch(
+            `http://localhost:8080/unidades/${unidadSeleccionada.identificador}/fotos`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ foto: fotoBase64 }),
+            },
+        );
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+          alert(datos.mensaje || "No se pudo agregar la foto");
+          return;
+        }
+
+        setUnidadSeleccionada((anterior) => ({
+          ...anterior,
+          fotos: datos.fotos,
+        }));
+
+        // También refrescamos el listado para que la miniatura se vea actualizada
+        setUnidades((anteriores) =>
+            anteriores.map((u) =>
+                u.identificador === unidadSeleccionada.identificador
+                    ? { ...u, fotos: datos.fotos }
+                    : u,
+            ),
+        );
+      } catch (error) {
+        console.error(error);
+        alert("No se pudo conectar con el servidor");
+      } finally {
+        setSubiendoFotoUnidad(false);
+      }
+    };
+
+    lector.readAsDataURL(archivo);
+  };
 
   // =========================================================
   // MI PERFIL: SOLO SE PUEDE CAMBIAR LA FOTO
@@ -512,10 +537,10 @@ function App() {
             {
               method: "PUT",
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
               },
-              body: JSON.stringify({ foto: fotoBase64 })
-            }
+              body: JSON.stringify({ foto: fotoBase64 }),
+            },
         );
 
         const datos = await respuesta.json();
@@ -526,11 +551,9 @@ function App() {
         }
 
         setUsuarioActual(datos);
-
       } catch (error) {
         console.error(error);
         alert("No se pudo conectar con el servidor");
-
       } finally {
         setSubiendoFoto(false);
       }
@@ -541,15 +564,12 @@ function App() {
 
   return (
       <div className="app-container">
-
         {/* =====================================================
           BARRA SUPERIOR
       ====================================================== */}
 
         <header className="topbar">
-
           <div className="brand">
-
             <img
                 src="https://static.vecteezy.com/system/resources/thumbnails/021/828/953/small/coffee-bean-icon-logo-illustration-vector.jpg"
                 alt="Logo"
@@ -560,7 +580,6 @@ function App() {
               <strong>Venta</strong>
               <span>Condominio</span>
             </div>
-
           </div>
 
           <div className="topbar-info">
@@ -572,7 +591,6 @@ function App() {
                 <span>Gestión inmobiliaria</span>
             )}
           </div>
-
         </header>
 
         {/* =====================================================
@@ -580,31 +598,23 @@ function App() {
       ====================================================== */}
 
         <main className="main-content">
-
           <div className="auth-card">
-
             {/* =================================================
               ENCABEZADO (solo antes de iniciar sesión)
           ================================================== */}
 
             {!usuarioActual && (
                 <div className="auth-header">
-
                   <div className="auth-icon">
-
                     <img
                         src="https://static.vecteezy.com/system/resources/thumbnails/021/828/953/small/coffee-bean-icon-logo-illustration-vector.jpg"
                         alt="Logo"
                     />
-
                   </div>
 
                   <h1>Venta Condominio</h1>
 
-                  <p>
-                    Gestión de unidades y clientes
-                  </p>
-
+                  <p>Gestión de unidades y clientes</p>
                 </div>
             )}
 
@@ -613,12 +623,7 @@ function App() {
           ================================================== */}
 
             {vista === "login" && (
-
-                <form
-                    className="auth-form"
-                    onSubmit={iniciarSesion}
-                >
-
+                <form className="auth-form" onSubmit={iniciarSesion}>
                   <h2>Iniciar sesión</h2>
 
                   <p className="form-description">
@@ -626,10 +631,7 @@ function App() {
                   </p>
 
                   <div className="input-group">
-
-                    <label>
-                      Correo electrónico
-                    </label>
+                    <label>Correo electrónico</label>
 
                     <input
                         type="email"
@@ -639,14 +641,10 @@ function App() {
                         onChange={manejarCambio}
                         required
                     />
-
                   </div>
 
                   <div className="input-group">
-
-                    <label>
-                      Contraseña
-                    </label>
+                    <label>Contraseña</label>
 
                     <input
                         type="password"
@@ -656,28 +654,20 @@ function App() {
                         onChange={manejarCambio}
                         required
                     />
-
                   </div>
 
                   <div className="forgot-password">
-
                     <button
                         type="button"
                         onClick={() =>
-                            alert(
-                                "Esta opción se implementará próximamente."
-                            )
+                            alert("Esta opción se implementará próximamente.")
                         }
                     >
                       ¿Olvidaste tu contraseña?
                     </button>
-
                   </div>
 
-                  <button
-                      type="submit"
-                      className="primary-button"
-                  >
+                  <button type="submit" className="primary-button">
                     Iniciar sesión
                   </button>
 
@@ -686,22 +676,12 @@ function App() {
                   </div>
 
                   <div className="register-question">
+                    <span>¿No tienes una cuenta?</span>
 
-                <span>
-                  ¿No tienes una cuenta?
-                </span>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setVista("registro")
-                        }
-                    >
+                    <button type="button" onClick={() => setVista("registro")}>
                       Crear cuenta
                     </button>
-
                   </div>
-
                 </form>
             )}
 
@@ -710,24 +690,15 @@ function App() {
           ================================================== */}
 
             {vista === "registro" && (
-
-                <form
-                    className="auth-form register-form"
-                    onSubmit={crearCuenta}
-                >
-
+                <form className="auth-form register-form" onSubmit={crearCuenta}>
                   <div className="form-top">
-
                     <button
                         type="button"
                         className="back-button"
-                        onClick={() =>
-                            setVista("login")
-                        }
+                        onClick={() => setVista("login")}
                     >
                       ← Volver
                     </button>
-
                   </div>
 
                   <h2>Crear cuenta</h2>
@@ -737,7 +708,6 @@ function App() {
                   </p>
 
                   <div className="form-grid">
-
                     <div className="input-group">
                       <label>Nombre</label>
                       <input
@@ -860,7 +830,9 @@ function App() {
                           onChange={manejarCambio}
                           required
                       >
-                        <option value="" disabled>Seleccionar</option>
+                        <option value="" disabled>
+                          Seleccionar
+                        </option>
                         <option value="APARTAMENTO">Apartamento</option>
                         <option value="CASA">Casa</option>
                       </select>
@@ -874,7 +846,9 @@ function App() {
                           onChange={manejarCambio}
                           required
                       >
-                        <option value="" disabled>Seleccionar</option>
+                        <option value="" disabled>
+                          Seleccionar
+                        </option>
                         {Object.keys(departamentos).map((departamento) => (
                             <option key={departamento} value={departamento}>
                               {departamento.replaceAll("_", " ")}
@@ -892,16 +866,19 @@ function App() {
                           disabled={!formulario.departamento}
                           required
                       >
-                        <option value="" disabled>Seleccionar</option>
+                        <option value="" disabled>
+                          Seleccionar
+                        </option>
                         {formulario.departamento &&
-                            departamentos[formulario.departamento].map((municipio) => (
-                                <option key={municipio} value={municipio}>
-                                  {municipio}
-                                </option>
-                            ))}
+                            departamentos[formulario.departamento].map(
+                                (municipio) => (
+                                    <option key={municipio} value={municipio}>
+                                      {municipio}
+                                    </option>
+                                ),
+                            )}
                       </select>
                     </div>
-
                   </div>
 
                   <button type="submit" className="primary-button">
@@ -914,7 +891,6 @@ function App() {
                       Iniciar sesión
                     </button>
                   </div>
-
                 </form>
             )}
 
@@ -923,12 +899,7 @@ function App() {
           ================================================== */}
 
             {vista === "verificacion" && (
-
-                <form
-                    className="auth-form"
-                    onSubmit={verificarCorreo}
-                >
-
+                <form className="auth-form" onSubmit={verificarCorreo}>
                   <h2>Verificar correo</h2>
 
                   <p className="form-description">
@@ -945,7 +916,7 @@ function App() {
                         value={codigoVerificacion}
                         onChange={(evento) =>
                             setCodigoVerificacion(
-                                evento.target.value.replace(/\D/g, "")
+                                evento.target.value.replace(/\D/g, ""),
                             )
                         }
                         required
@@ -967,7 +938,6 @@ function App() {
                       ← Volver al registro
                     </button>
                   </div>
-
                 </form>
             )}
 
@@ -977,11 +947,8 @@ function App() {
           ================================================== */}
 
             {vista === "panel" && usuarioActual && (
-
                 <div className="panel-view">
-
                   <div className="panel-tabs">
-
                     {pestanasDelUsuario.map((pestana) => (
                         <button
                             key={pestana}
@@ -1004,15 +971,12 @@ function App() {
                     >
                       Cerrar sesión
                     </button>
-
                   </div>
 
                   {/* ---- Pestaña: Unidades disponibles ---- */}
 
                   {pestanaActiva === "unidades" && (
-
                       <div className="units-view">
-
                         {cargandoUnidades && <p>Cargando unidades...</p>}
 
                         {!cargandoUnidades && errorUnidades && (
@@ -1022,73 +986,121 @@ function App() {
                         {!cargandoUnidades &&
                             !errorUnidades &&
                             unidades.length === 0 && (
-                                <p>
-                                  No hay unidades disponibles en este momento.
-                                </p>
+                                <p>No hay unidades disponibles en este momento.</p>
                             )}
 
                         {!cargandoUnidades && unidades.length > 0 && (
-
-                            <div className="units-grid">
-
-                              {unidades.map((unidad) => (
-
-                                  <div
-                                      key={unidad.identificador}
-                                      className="unit-card"
+                            <>
+                              <div className="units-filtros">
+                                <div className="input-group">
+                                  <label>Departamento</label>
+                                  <select
+                                      value={filtroDepartamento}
+                                      onChange={(evento) =>
+                                          setFiltroDepartamento(evento.target.value)
+                                      }
                                   >
+                                    <option value="">Todos</option>
+                                    {Object.keys(departamentos).map((departamento) => (
+                                        <option key={departamento} value={departamento}>
+                                          {departamento.replaceAll("_", " ")}
+                                        </option>
+                                    ))}
+                                  </select>
+                                </div>
 
-                                    <div className="unit-card-header">
-                                      <strong>{unidad.identificador}</strong>
-                                      <span className="unit-badge">
-                                    {unidad.estado}
-                                  </span>
-                                    </div>
+                                <div className="input-group">
+                                  <label>Tipo de inmueble</label>
+                                  <select
+                                      value={filtroTipo}
+                                      onChange={(evento) =>
+                                          setFiltroTipo(evento.target.value)
+                                      }
+                                  >
+                                    <option value="">Todos</option>
+                                    <option value="APARTAMENTO">Apartamento</option>
+                                    <option value="CASA">Casa</option>
+                                  </select>
+                                </div>
 
-                                    <p className="unit-tipo">
-                                      {unidad.tipoInmueble}
-                                    </p>
-
-                                    <p className="unit-precio">
-                                      {formatearPrecio(unidad.precioLista)}
-                                    </p>
-
-                                    <p className="unit-ubicacion">
-                                      {unidad.municipio?.nombre},{" "}
-                                      {unidad.departamento?.replaceAll("_", " ")}
-                                    </p>
-
-                                    <p className="unit-specs">
-                                      {unidad.area} m² ·{" "}
-                                      {unidad.habitaciones} hab ·{" "}
-                                      {unidad.banos} baños
-                                    </p>
-
+                                {(filtroDepartamento || filtroTipo) && (
                                     <button
                                         type="button"
-                                        className="primary-button"
-                                        onClick={() => verDetalleUnidad(unidad)}
+                                        className="secondary-button units-filtros-limpiar"
+                                        onClick={() => {
+                                          setFiltroDepartamento("");
+                                          setFiltroTipo("");
+                                        }}
                                     >
-                                      Ver detalle
+                                      Limpiar filtros
                                     </button>
+                                )}
+                              </div>
 
+                              {unidadesFiltradas.length === 0 ? (
+                                  <p>Ninguna unidad coincide con los filtros.</p>
+                              ) : (
+                                  <div className="units-grid">
+                                    {unidadesFiltradas.map((unidad) => (
+                                        <div
+                                            key={unidad.identificador}
+                                            className="unit-card"
+                                        >
+                                          {unidad.fotos && unidad.fotos.length > 0 ? (
+                                              <img
+                                                  src={unidad.fotos[0]}
+                                                  alt={unidad.identificador}
+                                                  className="unit-card-foto"
+                                              />
+                                          ) : (
+                                              <div className="unit-card-foto unit-card-foto-vacia">
+                                                Sin foto
+                                              </div>
+                                          )}
+
+                                          <div className="unit-card-header">
+                                            <strong>{unidad.identificador}</strong>
+                                            <span className="unit-badge">
+                                  {unidad.estado}
+                                </span>
+                                          </div>
+
+                                          <p className="unit-tipo">{unidad.tipoInmueble}</p>
+
+                                          <p className="unit-precio">
+                                            {formatearPrecio(unidad.precioLista)}
+                                          </p>
+
+                                          <p className="unit-ubicacion">
+                                            {unidad.municipio?.nombre},{" "}
+                                            {unidad.departamento?.replaceAll("_", " ")}
+                                          </p>
+
+                                          <p className="unit-specs">
+                                            {unidad.area} m² · {unidad.habitaciones} hab ·{" "}
+                                            {unidad.banos} baños
+                                          </p>
+
+                                          <button
+                                              type="button"
+                                              className="primary-button"
+                                              onClick={() => verDetalleUnidad(unidad)}
+                                          >
+                                            Ver detalle
+                                          </button>
+                                        </div>
+                                    ))}
                                   </div>
-
-                              ))}
-
-                            </div>
-
+                              )}
+                            </>
                         )}
-
                       </div>
                   )}
 
                   {/* ---- Pestaña: Crear unidad (Administrador / Director comercial) ---- */}
 
                   {pestanaActiva === "crear" && (
-
                       <form className="auth-form" onSubmit={crearUnidad}>
-
                         <h2>Crear unidad</h2>
 
                         <p className="form-description">
@@ -1096,7 +1108,6 @@ function App() {
                         </p>
 
                         <div className="form-grid">
-
                           <div className="input-group">
                             <label>Identificador</label>
                             <input
@@ -1116,7 +1127,9 @@ function App() {
                                 onChange={manejarCambioUnidad}
                                 required
                             >
-                              <option value="" disabled>Seleccionar</option>
+                              <option value="" disabled>
+                                Seleccionar
+                              </option>
                               <option value="APARTAMENTO">Apartamento</option>
                               <option value="CASA">Casa</option>
                             </select>
@@ -1181,7 +1194,9 @@ function App() {
                                 onChange={manejarCambioUnidad}
                                 required
                             >
-                              <option value="" disabled>Seleccionar</option>
+                              <option value="" disabled>
+                                Seleccionar
+                              </option>
                               {Object.keys(departamentos).map((departamento) => (
                                   <option key={departamento} value={departamento}>
                                     {departamento.replaceAll("_", " ")}
@@ -1199,13 +1214,17 @@ function App() {
                                 disabled={!formUnidad.departamento}
                                 required
                             >
-                              <option value="" disabled>Seleccionar</option>
+                              <option value="" disabled>
+                                Seleccionar
+                              </option>
                               {formUnidad.departamento &&
-                                  departamentos[formUnidad.departamento].map((municipio) => (
-                                      <option key={municipio} value={municipio}>
-                                        {municipio}
-                                      </option>
-                                  ))}
+                                  departamentos[formUnidad.departamento].map(
+                                      (municipio) => (
+                                          <option key={municipio} value={municipio}>
+                                            {municipio}
+                                          </option>
+                                      ),
+                                  )}
                             </select>
                           </div>
 
@@ -1218,26 +1237,21 @@ function App() {
                                 onChange={manejarCambioUnidad}
                             />
                           </div>
-
                         </div>
 
                         <button type="submit" className="primary-button">
                           Crear unidad
                         </button>
-
                       </form>
                   )}
 
                   {/* ---- Pestaña: Mi perfil (solo la foto es editable) ---- */}
 
                   {pestanaActiva === "perfil" && (
-
                       <div className="profile-view">
-
                         <h2>Mi perfil</h2>
 
                         <div className="profile-photo-wrapper">
-
                           {usuarioActual.fotoPerfil ? (
                               <img
                                   src={usuarioActual.fotoPerfil}
@@ -1249,7 +1263,6 @@ function App() {
                                 Sin foto
                               </div>
                           )}
-
                         </div>
 
                         <label className="secondary-button profile-upload-label">
@@ -1264,7 +1277,6 @@ function App() {
                         </label>
 
                         <div className="profile-info-grid">
-
                           <div>
                             <label>Nombre</label>
                             <p>{usuarioActual.nombre}</p>
@@ -1279,17 +1291,13 @@ function App() {
                             <label>Rol</label>
                             <p>{usuarioActual.rol.replaceAll("_", " ")}</p>
                           </div>
-
                         </div>
 
                         <p className="form-description">
-                          Los demás datos de tu perfil no se pueden editar
-                          desde aquí.
+                          Los demás datos de tu perfil no se pueden editar desde aquí.
                         </p>
-
                       </div>
                   )}
-
                 </div>
             )}
 
@@ -1298,11 +1306,8 @@ function App() {
           ================================================== */}
 
             {vista === "detalleUnidad" && unidadSeleccionada && (
-
                 <div className="unit-detail-view">
-
                   <div className="form-top">
-
                     <button
                         type="button"
                         className="back-button"
@@ -1310,18 +1315,47 @@ function App() {
                     >
                       ← Volver al listado
                     </button>
-
                   </div>
 
                   <h2>{unidadSeleccionada.identificador}</h2>
 
-                  <span className="unit-badge">
-                {unidadSeleccionada.estado}
-              </span>
+                  <span className="unit-badge">{unidadSeleccionada.estado}</span>
 
                   <p className="unit-precio-grande">
                     {formatearPrecio(unidadSeleccionada.precioLista)}
                   </p>
+
+                  {unidadSeleccionada.fotos &&
+                  unidadSeleccionada.fotos.length > 0 ? (
+                      <div className="unit-gallery">
+                        {unidadSeleccionada.fotos.map((foto, indice) => (
+                            <img
+                                key={indice}
+                                src={foto}
+                                alt={`${unidadSeleccionada.identificador} foto ${indice + 1}`}
+                                className="unit-gallery-foto"
+                            />
+                        ))}
+                      </div>
+                  ) : (
+                      <p className="form-description">
+                        Esta unidad todavía no tiene fotos.
+                      </p>
+                  )}
+
+                  {(usuarioActual?.rol === "DIRECTOR_COMERCIAL" ||
+                      usuarioActual?.rol === "ADMINISTRADOR_CONJUNTO") && (
+                      <label className="secondary-button profile-upload-label">
+                        {subiendoFotoUnidad ? "Subiendo..." : "Agregar foto"}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={manejarCambioFotoUnidad}
+                            disabled={subiendoFotoUnidad}
+                            hidden
+                        />
+                      </label>
+                  )}
 
                   {unidadSeleccionada.descripcion && (
                       <p className="form-description">
@@ -1330,7 +1364,6 @@ function App() {
                   )}
 
                   <div className="unit-detail-grid">
-
                     <div>
                       <label>Tipo de inmueble</label>
                       <p>{unidadSeleccionada.tipoInmueble}</p>
@@ -1353,25 +1386,18 @@ function App() {
 
                     <div>
                       <label>Departamento</label>
-                      <p>
-                        {unidadSeleccionada.departamento?.replaceAll("_", " ")}
-                      </p>
+                      <p>{unidadSeleccionada.departamento?.replaceAll("_", " ")}</p>
                     </div>
 
                     <div>
                       <label>Municipio</label>
                       <p>{unidadSeleccionada.municipio?.nombre}</p>
                     </div>
-
                   </div>
-
                 </div>
             )}
-
           </div>
-
         </main>
-
       </div>
   );
 }
