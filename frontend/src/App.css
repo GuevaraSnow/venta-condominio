@@ -664,18 +664,19 @@ button {
 }
 
 .unit-gallery {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 4px !important;
   margin: 0.75rem 0;
 }
 
 .unit-gallery-foto {
-  width: 140px;
-  height: 100px;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;
   object-fit: cover;
   border-radius: 8px;
-  flex-shrink: 0;
+  flex-shrink: initial;
 }
 
 /* ---- Mi perfil ---- */

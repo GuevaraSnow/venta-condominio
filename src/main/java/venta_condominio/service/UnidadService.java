@@ -1,104 +1,58 @@
 package venta_condominio.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
-import venta_condominio.exception.UsuarioException;
-import venta_condominio.model.Rol;
-import venta_condominio.model.Usuario;
-import venta_condominio.repository.UsuarioRepositorio;
+
+import venta_condominio.exception.ValidacionUnidadException;
+import venta_condominio.model.EstadoUnidad;
+import venta_condominio.model.Unidad;
+import venta_condominio.repository.UnidadRepositorio;
 import venta_condominio.util.GuardadorArchivos;
 
 @Service
-public class UsuarioService {
+public class UnidadService {
 
-    private final UsuarioRepositorio usuarioRepositorio;
-    private final VerificacionEmailService verificacionEmailService;
+    private final UnidadRepositorio unidadRepositorio;
 
-    public UsuarioService(
-            UsuarioRepositorio usuarioRepositorio,
-            VerificacionEmailService verificacionEmailService) {
-
-        this.usuarioRepositorio = usuarioRepositorio;
-        this.verificacionEmailService = verificacionEmailService;
+    public UnidadService(UnidadRepositorio unidadRepositorio) {
+        this.unidadRepositorio = unidadRepositorio;
     }
 
-    public void registrarUsuario(
-            String id,
-            String nombre,
-            String email,
-            String contrasena,
-            Rol rol) {
-
-        Usuario usuarioExistente =
-                usuarioRepositorio.buscarPorEmail(email);
-
-        if (usuarioExistente != null) {
-            throw new UsuarioException(
-                    "Ya existe un usuario registrado con ese correo"
-            );
-        }
-
-        if (rol == Rol.CLIENTE &&
-                !verificacionEmailService.estaVerificado(email)) {
-
-            throw new UsuarioException(
-                    "El correo electrónico debe ser verificado antes de crear la cuenta"
-            );
-        }
-
-        Usuario usuario = new Usuario(
-                id,
-                nombre,
-                email,
-                contrasena,
-                rol,
-                true,
-                null
-        );
-
-        usuarioRepositorio.guardar(usuario);
+    public List<Unidad> listarTodas() {
+        return unidadRepositorio.listar();
     }
 
-    public Usuario iniciarSesion(String email, String contrasena) {
-
-        if (email == null || email.isBlank() || contrasena == null || contrasena.isBlank()) {
-            throw new UsuarioException("Correo y contraseña son obligatorios");
-        }
-
-        Usuario usuario = usuarioRepositorio.buscarPorEmail(email);
-
-        if (usuario == null) {
-            throw new UsuarioException("Correo o contraseña incorrectos");
-        }
-
-        if (!usuario.isActivo()) {
-            throw new UsuarioException("La cuenta está inactiva");
-        }
-
-        if (!usuario.getContrasena().equals(contrasena)) {
-            throw new UsuarioException("Correo o contraseña incorrectos");
-        }
-
-        return usuario;
+    public List<Unidad> listarDisponibles() {
+        return unidadRepositorio.listarPorEstado(EstadoUnidad.DISPONIBLE);
     }
 
-    public Usuario actualizarFotoPerfil(String id, String fotoBase64) {
+    public Unidad obtenerPorIdentificador(String identificador) {
+        return unidadRepositorio.buscarPorIdentificador(identificador);
+    }
 
-        Usuario usuario = usuarioRepositorio.buscarPorId(id);
+    public void registrarUnidad(Unidad unidad) {
+        unidadRepositorio.guardar(unidad);
+    }
 
-        if (usuario == null) {
-            throw new UsuarioException("Usuario no encontrado");
+    public Unidad agregarFoto(String identificador, String fotoBase64) {
+
+        Unidad unidad = unidadRepositorio.buscarPorIdentificador(identificador);
+
+        if (unidad == null) {
+            throw new ValidacionUnidadException("No se encontró la unidad " + identificador);
         }
 
         if (fotoBase64 == null || fotoBase64.isBlank()) {
-            throw new UsuarioException("La foto es obligatoria");
+            throw new ValidacionUnidadException("La foto es obligatoria");
         }
 
-        String rutaFoto = GuardadorArchivos.guardarImagenBase64(fotoBase64, "perfiles");
+        String rutaFoto = GuardadorArchivos.guardarImagenBase64(fotoBase64, "unidades");
 
-        Usuario actualizado = usuario.conFotoPerfil(rutaFoto);
+        Unidad actualizada = unidad.conFotoAgregada(rutaFoto);
 
-        usuarioRepositorio.actualizar(actualizado);
+        unidadRepositorio.actualizar(actualizada);
 
-        return actualizado;
+        return actualizada;
     }
 }

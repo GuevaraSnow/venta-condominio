@@ -11,5 +11,6 @@
     "nombre" : "Circasia",
     "departamento" : "QUINDIO"
   },
-  "estado" : "DISPONIBLE"
+  "estado" : "DISPONIBLE",
+  "fotos" : [ "http://localhost:8080/archivos/unidades/71d317ff-1c2f-4a46-a956-46231734eedc.jpg", "http://localhost:8080/archivos/unidades/5d966a7a-fa21-4033-853c-630db17f1267.jpg", "http://localhost:8080/archivos/unidades/b1355784-a9dc-4f8b-a5fb-6c029d9a0d51.jpg", "http://localhost:8080/archivos/unidades/4b381cef-c1dc-4fcb-a7c4-3a7c6647f9e2.jpg", "http://localhost:8080/archivos/unidades/b5246cb5-7a8a-4024-9163-f7aed4194bb4.jpg", "http://localhost:8080/archivos/unidades/721fe860-e78d-45fe-919a-1559afcace77.jpg", "http://localhost:8080/archivos/unidades/04d6ac4f-7813-4114-8163-ee3e1b85e37b.jpg" ]
 } ]

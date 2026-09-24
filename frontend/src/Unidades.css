@@ -208,16 +208,15 @@
 }
 
 .unit-gallery {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    margin: 0.75rem 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
 }
 
 .unit-gallery-foto {
-    width: 140px;
-    height: 100px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: 8px;
-    flex-shrink: 0;
+    cursor: pointer;
+    border-radius: 4px;
 }

@@ -1,6 +1,8 @@
 package venta_condominio.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,6 +20,7 @@ public class Unidad {
     private final Departamento departamento;
     private final Municipio municipio;
     private final EstadoUnidad estado;
+    private final List<String> fotos;
 
     @JsonCreator
     public Unidad(
@@ -30,7 +33,8 @@ public class Unidad {
             @JsonProperty("descripcion") String descripcion,
             @JsonProperty("departamento") Departamento departamento,
             @JsonProperty("municipio") Municipio municipio,
-            @JsonProperty("estado") EstadoUnidad estado) {
+            @JsonProperty("estado") EstadoUnidad estado,
+            @JsonProperty("fotos") List<String> fotos) {
 
         if (identificador == null || identificador.isBlank()) {
             throw new ValidacionUnidadException("El identificador de la unidad es obligatorio");
@@ -66,6 +70,7 @@ public class Unidad {
         this.departamento = departamento;
         this.municipio = municipio;
         this.estado = estado != null ? estado : EstadoUnidad.DISPONIBLE;
+        this.fotos = fotos != null ? new ArrayList<>(fotos) : new ArrayList<>();
     }
 
     public String getIdentificador() {
@@ -108,11 +113,26 @@ public class Unidad {
         return estado;
     }
 
+    public List<String> getFotos() {
+        return fotos;
+    }
+
     public Unidad conEstado(EstadoUnidad nuevoEstado) {
         return new Unidad(
                 identificador, tipoInmueble, precioLista, area,
                 habitaciones, banos, descripcion, departamento,
-                municipio, nuevoEstado
+                municipio, nuevoEstado, fotos
+        );
+    }
+
+    public Unidad conFotoAgregada(String nuevaFotoBase64) {
+        List<String> fotosActualizadas = new ArrayList<>(fotos);
+        fotosActualizadas.add(nuevaFotoBase64);
+
+        return new Unidad(
+                identificador, tipoInmueble, precioLista, area,
+                habitaciones, banos, descripcion, departamento,
+                municipio, estado, fotosActualizadas
         );
     }
 }
