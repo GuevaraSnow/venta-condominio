@@ -16,6 +16,7 @@ public class RegistroClienteRequest {
     private String tipoInmueble;
     private Departamento departamento;
     private String municipio;
+    private boolean aceptoTratamientoDatos;
 
     public RegistroClienteRequest() {
     }
@@ -114,5 +115,13 @@ public class RegistroClienteRequest {
 
     public void setMunicipio(String municipio) {
         this.municipio = municipio;
+    }
+
+    public boolean isAceptoTratamientoDatos() {
+        return aceptoTratamientoDatos;
+    }
+
+    public void setAceptoTratamientoDatos(boolean aceptoTratamientoDatos) {
+        this.aceptoTratamientoDatos = aceptoTratamientoDatos;
     }
 }

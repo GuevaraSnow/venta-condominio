@@ -12,6 +12,20 @@ public class Usuario {
     private final Rol rol;
     private final boolean activo;
     private final String fotoPerfil;
+    private final boolean aceptoTratamientoDatos;
+    private final String fechaAceptacionDatos;
+
+    public Usuario(
+            String id,
+            String nombre,
+            String email,
+            String contrasena,
+            Rol rol,
+            boolean activo,
+            String fotoPerfil) {
+
+        this(id, nombre, email, contrasena, rol, activo, fotoPerfil, false, null);
+    }
 
     @JsonCreator
     public Usuario(
@@ -21,7 +35,9 @@ public class Usuario {
             @JsonProperty("contrasena") String contrasena,
             @JsonProperty("rol") Rol rol,
             @JsonProperty("activo") boolean activo,
-            @JsonProperty("fotoPerfil") String fotoPerfil) {
+            @JsonProperty("fotoPerfil") String fotoPerfil,
+            @JsonProperty("aceptoTratamientoDatos") boolean aceptoTratamientoDatos,
+            @JsonProperty("fechaAceptacionDatos") String fechaAceptacionDatos) {
 
         this.id = id;
         this.nombre = nombre;
@@ -30,6 +46,8 @@ public class Usuario {
         this.rol = rol;
         this.activo = activo;
         this.fotoPerfil = fotoPerfil;
+        this.aceptoTratamientoDatos = aceptoTratamientoDatos;
+        this.fechaAceptacionDatos = fechaAceptacionDatos;
     }
 
     public String getId() {
@@ -60,7 +78,16 @@ public class Usuario {
         return fotoPerfil;
     }
 
+    public boolean isAceptoTratamientoDatos() {
+        return aceptoTratamientoDatos;
+    }
+
+    public String getFechaAceptacionDatos() {
+        return fechaAceptacionDatos;
+    }
+
     public Usuario conFotoPerfil(String nuevaFoto) {
-        return new Usuario(id, nombre, email, contrasena, rol, activo, nuevaFoto);
+        return new Usuario(id, nombre, email, contrasena, rol, activo, nuevaFoto,
+                aceptoTratamientoDatos, fechaAceptacionDatos);
     }
 }

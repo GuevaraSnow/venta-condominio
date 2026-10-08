@@ -20,6 +20,8 @@ function App() {
   const [codigoVerificacion, setCodigoVerificacion] = useState("");
   const [usuarioActual, setUsuarioActual] = useState(null);
   const [pestanaActiva, setPestanaActiva] = useState("unidades");
+  const [mostrarHabeasData, setMostrarHabeasData] = useState(false);
+  const [aceptoTratamientoDatos, setAceptoTratamientoDatos] = useState(false);
 
   const [formulario, setFormulario] = useState({
     nombre: "",
@@ -292,6 +294,7 @@ function App() {
           tipoInmueble: formulario.tipoInmueble,
           departamento: formulario.departamento,
           municipio: formulario.municipio,
+          aceptoTratamientoDatos: aceptoTratamientoDatos,
         }),
       });
 
@@ -585,7 +588,7 @@ function App() {
           <div className="topbar-info">
             {usuarioActual ? (
                 <span>
-              {usuarioActual.nombre} · {usuarioActual.rol.replaceAll("_", " ")}
+              {usuarioActual.nombre}
             </span>
             ) : (
                 <span>Gestión inmobiliaria</span>
@@ -678,7 +681,7 @@ function App() {
                   <div className="register-question">
                     <span>¿No tienes una cuenta?</span>
 
-                    <button type="button" onClick={() => setVista("registro")}>
+                    <button type="button" onClick={() => setMostrarHabeasData(true)}>
                       Crear cuenta
                     </button>
                   </div>
@@ -1286,11 +1289,6 @@ function App() {
                             <label>Correo electrónico</label>
                             <p>{usuarioActual.email}</p>
                           </div>
-
-                          <div>
-                            <label>Rol</label>
-                            <p>{usuarioActual.rol.replaceAll("_", " ")}</p>
-                          </div>
                         </div>
 
                         <p className="form-description">
@@ -1398,6 +1396,68 @@ function App() {
             )}
           </div>
         </main>
+
+        {/* =====================================================
+          AVISO DE TRATAMIENTO DE DATOS (HABEAS DATA)
+      ====================================================== */}
+
+        {mostrarHabeasData && (
+            <div className="modal-overlay">
+              <div className="modal-habeas" role="dialog" aria-modal="true">
+                <h2>Tratamiento de datos personales</h2>
+
+                <p>
+                  Al registrarte, los datos personales que suministres (nombre,
+                  cédula, correo, teléfono, información económica y de ubicación)
+                  serán recolectados, almacenados y tratados por Venta Condominio
+                  conforme a la Ley Estatutaria 1581 de 2012 (Habeas Data), el
+                  Decreto 1377 de 2013 y demás normas concordantes.
+                </p>
+
+                <p>
+                  La finalidad del tratamiento es gestionar tu proceso como
+                  cliente interesado: contacto comercial, cotizaciones, reservas y
+                  verificación de capacidad de crédito.
+                </p>
+
+                <p>
+                  Como titular tienes derecho a conocer, actualizar, rectificar y
+                  suprimir tus datos, así como a revocar esta autorización en
+                  cualquier momento.
+                </p>
+
+                <p className="modal-pregunta">
+                  ¿Autorizas el tratamiento de tus datos personales?
+                </p>
+
+                <div className="modal-acciones">
+                  <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => {
+                        setMostrarHabeasData(false);
+                        setAceptoTratamientoDatos(false);
+                        setVista("login");
+                      }}
+                  >
+                    No acepto
+                  </button>
+
+                  <button
+                      type="button"
+                      className="primary-button"
+                      onClick={() => {
+                        setMostrarHabeasData(false);
+                        setAceptoTratamientoDatos(true);
+                        setVista("registro");
+                      }}
+                  >
+                    Acepto
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
       </div>
   );
 }

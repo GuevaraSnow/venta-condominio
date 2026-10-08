@@ -737,3 +737,65 @@ button {
   font-weight: 600;
   color: #20242d;
 }
+
+/* =========================================================
+   AVISO HABEAS DATA
+========================================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.modal-habeas {
+  background: #ffffff;
+  color: #222;
+  max-width: 520px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+.modal-habeas h2 {
+  margin-top: 0;
+}
+
+.modal-habeas p {
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.modal-pregunta {
+  font-weight: 600;
+  margin-top: 18px;
+}
+
+.modal-acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modal-acciones button {
+  width: auto;
+  padding: 10px 22px;
+}
+
+.secondary-button {
+  background: transparent;
+  border: 1px solid #999;
+  border-radius: 8px;
+  color: #444;
+  cursor: pointer;
+}

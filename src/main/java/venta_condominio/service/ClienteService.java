@@ -30,6 +30,12 @@ public class ClienteService {
 
     public void registrarCliente(RegistroClienteRequest request) {
 
+        if (!request.isAceptoTratamientoDatos()) {
+            throw new UsuarioException(
+                    "Debes aceptar el tratamiento de datos personales (Ley 1581 de 2012) para registrarte"
+            );
+        }
+
         String email = request.getEmail();
 
         if (!verificacionEmailService.estaVerificado(email)) {
@@ -70,7 +76,8 @@ public class ClienteService {
                 request.getNombre(),
                 request.getEmail(),
                 request.getContrasena(),
-                Rol.CLIENTE
+                Rol.CLIENTE,
+                true
         );
 
         clienteRepositorio.guardar(cliente);

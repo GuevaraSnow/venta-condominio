@@ -1,5 +1,7 @@
 package venta_condominio.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import venta_condominio.exception.UsuarioException;
 import venta_condominio.model.Rol;
@@ -28,6 +30,17 @@ public class UsuarioService {
             String contrasena,
             Rol rol) {
 
+        registrarUsuario(id, nombre, email, contrasena, rol, false);
+    }
+
+    public void registrarUsuario(
+            String id,
+            String nombre,
+            String email,
+            String contrasena,
+            Rol rol,
+            boolean aceptoTratamientoDatos) {
+
         Usuario usuarioExistente =
                 usuarioRepositorio.buscarPorEmail(email);
 
@@ -52,7 +65,9 @@ public class UsuarioService {
                 contrasena,
                 rol,
                 true,
-                null
+                null,
+                aceptoTratamientoDatos,
+                aceptoTratamientoDatos ? LocalDateTime.now().toString() : null
         );
 
         usuarioRepositorio.guardar(usuario);

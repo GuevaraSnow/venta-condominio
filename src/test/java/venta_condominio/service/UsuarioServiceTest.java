@@ -14,6 +14,41 @@ import static org.mockito.Mockito.mock;
 class UsuarioServiceTest {
 
     @Test
+    void debeGuardarAceptacionDeTratamientoDeDatos() {
+
+        UsuarioRepositorio repositorio =
+                new RepositorioEnMemoria();
+
+        VerificacionEmailService verificacionEmailService =
+                new VerificacionEmailService(
+                        mock(ServicioEnvioEmail.class)
+                );
+
+        UsuarioService service =
+                new UsuarioService(
+                        repositorio,
+                        verificacionEmailService
+                );
+
+        verificacionEmailService.generarCodigo("cliente.prueba@gmail.com");
+        verificacionEmailService.marcarComoVerificado("cliente.prueba@gmail.com");
+
+        service.registrarUsuario(
+                "USR-010",
+                "Cliente Prueba",
+                "cliente.prueba@gmail.com",
+                "123456",
+                Rol.CLIENTE,
+                true
+        );
+
+        Usuario usuario = repositorio.buscarPorEmail("cliente.prueba@gmail.com");
+
+        assertTrue(usuario.isAceptoTratamientoDatos());
+        assertNotNull(usuario.getFechaAceptacionDatos());
+    }
+
+    @Test
     void debeRegistrarUsuario() {
 
         UsuarioRepositorio repositorio =
