@@ -1,0 +1,8 @@
+frontend/
+build/
+.gradle/
+.git/
+uploads/
+*.json
+.idea/
+.vscode/
