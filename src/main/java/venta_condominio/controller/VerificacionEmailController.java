@@ -8,7 +8,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/verificacion-email")
-@CrossOrigin(origins = "http://localhost:5173")
 public class VerificacionEmailController {
 
     private final VerificacionEmailService verificacionEmailService;
@@ -64,4 +63,4 @@ public class VerificacionEmailController {
                 )
         );
     }
-}
+}

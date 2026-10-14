@@ -13,7 +13,6 @@ import venta_condominio.service.UsuarioService;
 
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin(origins = "http://localhost:5173")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -91,4 +90,4 @@ public class UsuarioController {
                 "fotoPerfil", usuario.getFotoPerfil() != null ? usuario.getFotoPerfil() : ""
         );
     }
-}
+}

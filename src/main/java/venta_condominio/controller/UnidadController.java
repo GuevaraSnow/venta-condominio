@@ -13,7 +13,6 @@ import venta_condominio.service.UnidadService;
 
 @RestController
 @RequestMapping("/unidades")
-@CrossOrigin(origins = "http://localhost:5173")
 public class UnidadController {
 
     private final UnidadService unidadService;
@@ -90,4 +89,4 @@ public class UnidadController {
             );
         }
     }
-}
+}
