@@ -1,5 +1,6 @@
 package venta_condominio.repository;
 
+import venta_condominio.util.Almacenamiento;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class UnidadRepositorioJson implements UnidadRepositorio {
             unidades.add(unidad);
 
             objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(new File(rutaArchivo), unidades);
+                    .writeValue(Almacenamiento.archivo(rutaArchivo), unidades);
 
         } catch (Exception e) {
             throw new RuntimeException("No se pudo guardar la unidad", e);
@@ -41,7 +42,7 @@ public class UnidadRepositorioJson implements UnidadRepositorio {
     @Override
     public List<Unidad> listar() {
 
-        File archivo = new File(rutaArchivo);
+        File archivo = Almacenamiento.archivo(rutaArchivo);
 
         if (!archivo.exists()) {
             return new ArrayList<>();
@@ -118,10 +119,10 @@ public class UnidadRepositorioJson implements UnidadRepositorio {
 
         try {
             objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(new File(rutaArchivo), unidades);
+                    .writeValue(Almacenamiento.archivo(rutaArchivo), unidades);
 
         } catch (Exception e) {
             throw new RuntimeException("No se pudo actualizar la unidad", e);
         }
     }
-}
+}

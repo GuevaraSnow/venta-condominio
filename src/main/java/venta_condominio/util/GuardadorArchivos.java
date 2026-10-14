@@ -26,7 +26,7 @@ public class GuardadorArchivos {
         String nombreArchivo = UUID.randomUUID() + "." + extension;
 
         try {
-            File directorio = new File("uploads/" + carpeta);
+            File directorio = new File(Almacenamiento.directorioUploads(), carpeta);
 
             if (!directorio.exists()) {
                 directorio.mkdirs();
@@ -40,9 +40,9 @@ public class GuardadorArchivos {
             throw new RuntimeException("No se pudo guardar la imagen", e);
         }
 
-        // URL completa: el frontend corre en otro puerto (5173), así que
-        // una ruta relativa no funcionaría para cargar la imagen.
-        return "http://localhost:8080/archivos/" + carpeta + "/" + nombreArchivo;
+        // Ruta relativa: el frontend le antepone la URL del backend
+        // (VITE_API_URL), así funciona igual en local y en producción.
+        return "/archivos/" + carpeta + "/" + nombreArchivo;
     }
 
     private static String extraerExtension(String encabezado) {
@@ -61,4 +61,4 @@ public class GuardadorArchivos {
 
         return "jpg";
     }
-}
+}

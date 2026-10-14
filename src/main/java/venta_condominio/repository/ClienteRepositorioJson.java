@@ -1,5 +1,6 @@
 package venta_condominio.repository;
 
+import venta_condominio.util.Almacenamiento;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class ClienteRepositorioJson implements ClienteRepositorio {
     public void guardar(Cliente cliente) {
 
         try {
-            File archivo = new File(rutaArchivo);
+            File archivo = Almacenamiento.archivo(rutaArchivo);
 
             List<Cliente> clientes = listar();
 
@@ -43,7 +44,7 @@ public class ClienteRepositorioJson implements ClienteRepositorio {
     @Override
     public List<Cliente> listar() {
 
-        File archivo = new File(rutaArchivo);
+        File archivo = Almacenamiento.archivo(rutaArchivo);
 
         if (!archivo.exists()) {
             return new ArrayList<>();
@@ -115,7 +116,7 @@ public class ClienteRepositorioJson implements ClienteRepositorio {
         }
 
         try {
-            File archivo = new File(rutaArchivo);
+            File archivo = Almacenamiento.archivo(rutaArchivo);
 
             objectMapper.writerWithDefaultPrettyPrinter()
                     .writeValue(archivo, clientes);
@@ -124,4 +125,4 @@ public class ClienteRepositorioJson implements ClienteRepositorio {
             throw new RuntimeException("No se pudo eliminar el cliente", e);
         }
     }
-}
+}

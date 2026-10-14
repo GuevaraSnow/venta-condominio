@@ -1,5 +1,6 @@
 package venta_condominio.repository;
 
+import venta_condominio.util.Almacenamiento;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.stereotype.Repository;
@@ -35,7 +36,7 @@ public class UsuarioRepositorioJson implements UsuarioRepositorio {
     @Override
     public List<Usuario> listar() {
 
-        File archivo = new File(rutaArchivo);
+        File archivo = Almacenamiento.archivo(rutaArchivo);
 
         if (!archivo.exists()) {
             return new ArrayList<>();
@@ -111,7 +112,7 @@ public class UsuarioRepositorioJson implements UsuarioRepositorio {
 
         try {
             objectMapper.writeValue(
-                    new File(rutaArchivo),
+                    Almacenamiento.archivo(rutaArchivo),
                     usuarios
             );
 
@@ -119,4 +120,4 @@ public class UsuarioRepositorioJson implements UsuarioRepositorio {
             throw new RuntimeException("Error al escribir usuarios.json", e);
         }
     }
-}
+}
