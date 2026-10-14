@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import { API_URL, urlArchivo } from "./api";
 
 const PESTANAS_POR_ROL = {
   CLIENTE: ["unidades", "perfil"],
@@ -143,7 +144,7 @@ function App() {
     evento.preventDefault();
 
     try {
-      const respuesta = await fetch("http://localhost:8080/usuarios/login", {
+      const respuesta = await fetch(`${API_URL}/usuarios/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -196,7 +197,7 @@ function App() {
 
     try {
       const respuesta = await fetch(
-          "http://localhost:8080/verificacion-email/generar",
+          `${API_URL}/verificacion-email/generar`,
           {
             method: "POST",
             headers: {
@@ -235,7 +236,7 @@ function App() {
       console.log("CODIGO INGRESADO:", codigoVerificacion);
 
       const respuestaVerificacion = await fetch(
-          "http://localhost:8080/verificacion-email/verificar",
+          `${API_URL}/verificacion-email/verificar`,
           {
             method: "POST",
             headers: {
@@ -276,7 +277,7 @@ function App() {
         municipio: formulario.municipio,
       });
 
-      const respuestaCliente = await fetch("http://localhost:8080/clientes", {
+      const respuestaCliente = await fetch(`${API_URL}/clientes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -351,7 +352,7 @@ function App() {
 
     try {
       const respuesta = await fetch(
-          "http://localhost:8080/unidades/disponibles",
+          `${API_URL}/unidades/disponibles`,
       );
 
       if (!respuesta.ok) {
@@ -390,7 +391,7 @@ function App() {
     evento.preventDefault();
 
     try {
-      const respuesta = await fetch("http://localhost:8080/unidades", {
+      const respuesta = await fetch(`${API_URL}/unidades`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -475,7 +476,7 @@ function App() {
 
       try {
         const respuesta = await fetch(
-            `http://localhost:8080/unidades/${unidadSeleccionada.identificador}/fotos`,
+            `${API_URL}/unidades/${unidadSeleccionada.identificador}/fotos`,
             {
               method: "POST",
               headers: {
@@ -536,7 +537,7 @@ function App() {
 
       try {
         const respuesta = await fetch(
-            `http://localhost:8080/usuarios/${usuarioActual.id}/foto`,
+            `${API_URL}/usuarios/${usuarioActual.id}/foto`,
             {
               method: "PUT",
               headers: {
@@ -1051,7 +1052,7 @@ function App() {
                                         >
                                           {unidad.fotos && unidad.fotos.length > 0 ? (
                                               <img
-                                                  src={unidad.fotos[0]}
+                                                  src={urlArchivo(unidad.fotos[0])}
                                                   alt={unidad.identificador}
                                                   className="unit-card-foto"
                                               />
@@ -1257,7 +1258,7 @@ function App() {
                         <div className="profile-photo-wrapper">
                           {usuarioActual.fotoPerfil ? (
                               <img
-                                  src={usuarioActual.fotoPerfil}
+                                  src={urlArchivo(usuarioActual.fotoPerfil)}
                                   alt="Foto de perfil"
                                   className="profile-photo"
                               />
@@ -1329,7 +1330,7 @@ function App() {
                         {unidadSeleccionada.fotos.map((foto, indice) => (
                             <img
                                 key={indice}
-                                src={foto}
+                                src={urlArchivo(foto)}
                                 alt={`${unidadSeleccionada.identificador} foto ${indice + 1}`}
                                 className="unit-gallery-foto"
                             />
