@@ -24,6 +24,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.mongodb:mongodb-driver-sync'
 }
 
 tasks.named('test') {

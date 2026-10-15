@@ -1,7 +1,6 @@
 package venta_condominio.repository;
 
 import venta_condominio.util.Almacenamiento;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +26,13 @@ public class ClienteRepositorioJson implements ClienteRepositorio {
     public void guardar(Cliente cliente) {
 
         try {
-            File archivo = Almacenamiento.archivo(rutaArchivo);
-
             List<Cliente> clientes = listar();
 
             clientes.add(cliente);
 
-            objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(archivo, clientes);
+            Almacenamiento.escribirTexto(rutaArchivo,
+                    objectMapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(clientes));
 
         } catch (Exception e) {
             throw new RuntimeException("No se pudo guardar el cliente", e);
@@ -44,16 +42,16 @@ public class ClienteRepositorioJson implements ClienteRepositorio {
     @Override
     public List<Cliente> listar() {
 
-        File archivo = Almacenamiento.archivo(rutaArchivo);
+        String contenido = Almacenamiento.leerTexto(rutaArchivo);
 
-        if (!archivo.exists()) {
+        if (contenido == null || contenido.isBlank()) {
             return new ArrayList<>();
         }
 
         List<Cliente> clientes = new ArrayList<>();
 
         try {
-            JsonNode raiz = objectMapper.readTree(archivo);
+            JsonNode raiz = objectMapper.readTree(contenido);
 
             if (raiz == null || !raiz.isArray()) {
                 return clientes;
@@ -116,13 +114,12 @@ public class ClienteRepositorioJson implements ClienteRepositorio {
         }
 
         try {
-            File archivo = Almacenamiento.archivo(rutaArchivo);
-
-            objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(archivo, clientes);
+            Almacenamiento.escribirTexto(rutaArchivo,
+                    objectMapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(clientes));
 
         } catch (Exception e) {
             throw new RuntimeException("No se pudo eliminar el cliente", e);
         }
     }
-}
+}

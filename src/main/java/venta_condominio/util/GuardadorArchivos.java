@@ -1,8 +1,5 @@
 package venta_condominio.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -25,20 +22,7 @@ public class GuardadorArchivos {
 
         String nombreArchivo = UUID.randomUUID() + "." + extension;
 
-        try {
-            File directorio = new File(Almacenamiento.directorioUploads(), carpeta);
-
-            if (!directorio.exists()) {
-                directorio.mkdirs();
-            }
-
-            File archivo = new File(directorio, nombreArchivo);
-
-            Files.write(archivo.toPath(), bytes);
-
-        } catch (IOException e) {
-            throw new RuntimeException("No se pudo guardar la imagen", e);
-        }
+        Almacenamiento.guardarArchivo(carpeta + "/" + nombreArchivo, bytes);
 
         // Ruta relativa: el frontend le antepone la URL del backend
         // (VITE_API_URL), así funciona igual en local y en producción.
@@ -61,4 +45,4 @@ public class GuardadorArchivos {
 
         return "jpg";
     }
-}
+}

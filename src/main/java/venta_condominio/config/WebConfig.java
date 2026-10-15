@@ -1,11 +1,8 @@
 package venta_condominio.config;
 
-import venta_condominio.util.Almacenamiento;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -28,18 +25,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
-        String ubicacion = Almacenamiento.directorioUploads()
-                .toPath().toAbsolutePath().normalize().toUri().toString();
-
-        if (!ubicacion.endsWith("/")) {
-            ubicacion += "/";
-        }
-
-        registry.addResourceHandler("/archivos/**")
-                .addResourceLocations(ubicacion);
-    }
-}
+}

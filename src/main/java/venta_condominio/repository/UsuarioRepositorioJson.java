@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.stereotype.Repository;
 import venta_condominio.model.Usuario;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,15 +35,15 @@ public class UsuarioRepositorioJson implements UsuarioRepositorio {
     @Override
     public List<Usuario> listar() {
 
-        File archivo = Almacenamiento.archivo(rutaArchivo);
+        String contenido = Almacenamiento.leerTexto(rutaArchivo);
 
-        if (!archivo.exists()) {
+        if (contenido == null || contenido.isBlank()) {
             return new ArrayList<>();
         }
 
         try {
             Usuario[] usuarios = objectMapper.readValue(
-                    archivo,
+                    contenido,
                     Usuario[].class
             );
 
@@ -111,13 +110,13 @@ public class UsuarioRepositorioJson implements UsuarioRepositorio {
     private void guardarLista(List<Usuario> usuarios) {
 
         try {
-            objectMapper.writeValue(
-                    Almacenamiento.archivo(rutaArchivo),
-                    usuarios
+            Almacenamiento.escribirTexto(
+                    rutaArchivo,
+                    objectMapper.writeValueAsString(usuarios)
             );
 
         } catch (IOException e) {
             throw new RuntimeException("Error al escribir usuarios.json", e);
         }
     }
-}
+}

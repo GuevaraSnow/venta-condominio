@@ -1,3 +1,5 @@
+# Backend para Render (plan gratis). Los datos van a MongoDB Atlas (MONGODB_URI).
+
 # ---------- Etapa 1: compilar el backend ----------
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
@@ -15,8 +17,8 @@ WORKDIR /app
 
 COPY --from=build /app/build/libs/*.jar app.jar
 
-# Los JSON e imágenes se guardan aquí; en Railway se monta un volumen en /data
-ENV DATA_DIR=/data
+# Ajustes de memoria para el plan gratis (512 MB de RAM)
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k -XX:TieredStopAtLevel=1"
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

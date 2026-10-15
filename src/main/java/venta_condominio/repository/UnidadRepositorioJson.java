@@ -1,7 +1,6 @@
 package venta_condominio.repository;
 
 import venta_condominio.util.Almacenamiento;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +30,9 @@ public class UnidadRepositorioJson implements UnidadRepositorio {
             List<Unidad> unidades = listar();
             unidades.add(unidad);
 
-            objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(Almacenamiento.archivo(rutaArchivo), unidades);
+            Almacenamiento.escribirTexto(rutaArchivo,
+                    objectMapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(unidades));
 
         } catch (Exception e) {
             throw new RuntimeException("No se pudo guardar la unidad", e);
@@ -42,16 +42,16 @@ public class UnidadRepositorioJson implements UnidadRepositorio {
     @Override
     public List<Unidad> listar() {
 
-        File archivo = Almacenamiento.archivo(rutaArchivo);
+        String contenido = Almacenamiento.leerTexto(rutaArchivo);
 
-        if (!archivo.exists()) {
+        if (contenido == null || contenido.isBlank()) {
             return new ArrayList<>();
         }
 
         List<Unidad> unidades = new ArrayList<>();
 
         try {
-            JsonNode raiz = objectMapper.readTree(archivo);
+            JsonNode raiz = objectMapper.readTree(contenido);
 
             if (raiz == null || !raiz.isArray()) {
                 return unidades;
@@ -118,11 +118,12 @@ public class UnidadRepositorioJson implements UnidadRepositorio {
         unidades.add(unidad);
 
         try {
-            objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(Almacenamiento.archivo(rutaArchivo), unidades);
+            Almacenamiento.escribirTexto(rutaArchivo,
+                    objectMapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(unidades));
 
         } catch (Exception e) {
             throw new RuntimeException("No se pudo actualizar la unidad", e);
         }
     }
-}
+}
