@@ -1,5 +1,9 @@
 package venta_condominio.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -81,5 +85,26 @@ public class ClienteService {
         );
 
         clienteRepositorio.guardar(cliente);
+    }
+
+    /**
+     * Lista resumida de clientes para que el asesor elija a quién cotizar (F-03).
+     * No expone cédula, teléfono ni salario.
+     */
+    public List<Map<String, Object>> listarResumen() {
+
+        List<Map<String, Object>> resumen = new ArrayList<>();
+
+        for (Cliente cliente : clienteRepositorio.listar()) {
+            Map<String, Object> fila = new LinkedHashMap<>();
+            fila.put("nombre", (cliente.getNombre() + " " + cliente.getPrimerApellido()).trim());
+            fila.put("email", cliente.getEmail());
+            fila.put("tipoInmueble", cliente.getTipoInmueble());
+            fila.put("presupuesto", cliente.getPresupuesto());
+            fila.put("municipio", cliente.getMunicipio() != null ? cliente.getMunicipio().getNombre() : null);
+            resumen.add(fila);
+        }
+
+        return resumen;
     }
 }

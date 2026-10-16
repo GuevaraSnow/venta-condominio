@@ -1,18 +1,20 @@
 import { useState } from "react";
 import "./App.css";
 import { API_URL, urlArchivo } from "./api";
+import Cotizaciones from "./Cotizaciones";
 
 const PESTANAS_POR_ROL = {
-  CLIENTE: ["unidades", "perfil"],
-  ASESOR_COMERCIAL: ["unidades", "perfil"],
+  CLIENTE: ["unidades", "cotizaciones", "perfil"],
+  ASESOR_COMERCIAL: ["unidades", "cotizaciones", "perfil"],
   ABOGADO: ["unidades", "perfil"],
-  DIRECTOR_COMERCIAL: ["unidades", "crear", "perfil"],
+  DIRECTOR_COMERCIAL: ["unidades", "crear", "cotizaciones", "perfil"],
   ADMINISTRADOR_CONJUNTO: ["unidades", "crear", "perfil"],
 };
 
 const ETIQUETAS_PESTANA = {
   unidades: "Unidades disponibles",
   crear: "Crear unidad",
+  cotizaciones: "Cotizaciones",
   perfil: "Mi perfil",
 };
 
@@ -1249,7 +1251,9 @@ function App() {
                               setPestanaActiva(pestana);
                             }}
                         >
-                          {ETIQUETAS_PESTANA[pestana]}
+                          {pestana === "cotizaciones" && usuarioActual.rol === "CLIENTE"
+                              ? "Mis cotizaciones"
+                              : ETIQUETAS_PESTANA[pestana]}
                         </button>
                     ))}
 
@@ -1548,6 +1552,12 @@ function App() {
                   )}
 
                   {/* ---- Pestaña: Mi perfil (solo la foto es editable) ---- */}
+
+                  {/* ---- Pestaña: Cotizaciones (F-03) ---- */}
+
+                  {pestanaActiva === "cotizaciones" && (
+                      <Cotizaciones usuario={usuarioActual} unidades={unidades} />
+                  )}
 
                   {pestanaActiva === "perfil" && (
                       <div className="profile-view">

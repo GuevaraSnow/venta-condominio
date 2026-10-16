@@ -1,0 +1,316 @@
+package venta_condominio.service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
+
+import org.springframework.stereotype.Service;
+
+import venta_condominio.exception.ValidacionCotizacionException;
+import venta_condominio.model.AccionCotizacionRequest;
+import venta_condominio.model.Cliente;
+import venta_condominio.model.Cotizacion;
+import venta_condominio.model.CotizacionRequest;
+import venta_condominio.model.EstadoCotizacion;
+import venta_condominio.model.EstadoUnidad;
+import venta_condominio.model.Rol;
+import venta_condominio.model.Unidad;
+import venta_condominio.model.Usuario;
+import venta_condominio.repository.ClienteRepositorio;
+import venta_condominio.repository.CotizacionRepositorio;
+import venta_condominio.repository.UnidadRepositorio;
+import venta_condominio.repository.UsuarioRepositorio;
+
+/**
+ * F-03 Generar cotización.
+ *
+ * Condiciones acordadas con el negocio:
+ *  - cuota inicial = 30 % del precio final; el resto es el saldo a financiar
+ *  - la cotización es válida 15 días
+ *  - descuento máximo 10 %; si supera el 2 % la autoriza el director comercial (R003)
+ */
+@Service
+public class CotizacionService {
+
+    public static final BigDecimal PORCENTAJE_CUOTA_INICIAL = new BigDecimal("30");
+    public static final BigDecimal DESCUENTO_SIN_AUTORIZACION = new BigDecimal("2");
+    public static final BigDecimal DESCUENTO_MAXIMO = new BigDecimal("10");
+    public static final int DIAS_VIGENCIA = 15;
+
+    private static final BigDecimal CIEN = new BigDecimal("100");
+
+    private final CotizacionRepositorio cotizacionRepositorio;
+    private final UnidadRepositorio unidadRepositorio;
+    private final ClienteRepositorio clienteRepositorio;
+    private final UsuarioRepositorio usuarioRepositorio;
+
+    /** Permite fijar "hoy" en las pruebas. */
+    private Supplier<LocalDate> hoy = LocalDate::now;
+
+    public CotizacionService(CotizacionRepositorio cotizacionRepositorio,
+                             UnidadRepositorio unidadRepositorio,
+                             ClienteRepositorio clienteRepositorio,
+                             UsuarioRepositorio usuarioRepositorio) {
+        this.cotizacionRepositorio = cotizacionRepositorio;
+        this.unidadRepositorio = unidadRepositorio;
+        this.clienteRepositorio = clienteRepositorio;
+        this.usuarioRepositorio = usuarioRepositorio;
+    }
+
+    void setHoy(Supplier<LocalDate> hoy) {
+        this.hoy = hoy;
+    }
+
+    // =====================================================
+    // Crear
+    // =====================================================
+
+    public Cotizacion crear(CotizacionRequest request) {
+
+        if (request == null) {
+            throw new ValidacionCotizacionException("Faltan los datos de la cotización");
+        }
+
+        Usuario asesor = exigirRol(request.getEmailAsesor(),
+                "Solo el asesor o el director comercial pueden generar cotizaciones",
+                Rol.ASESOR_COMERCIAL, Rol.DIRECTOR_COMERCIAL);
+
+        Cliente cliente = clienteRepositorio.buscarPorEmail(texto(request.getEmailCliente()));
+
+        if (cliente == null) {
+            throw new ValidacionCotizacionException("El cliente no está registrado");
+        }
+
+        Unidad unidad = unidadRepositorio.buscarPorIdentificador(texto(request.getIdentificadorUnidad()));
+
+        if (unidad == null) {
+            throw new ValidacionCotizacionException("No se encontró la unidad " + request.getIdentificadorUnidad());
+        }
+
+        // F-12: solo se cotizan unidades disponibles
+        if (unidad.getEstado() != EstadoUnidad.DISPONIBLE) {
+            throw new ValidacionCotizacionException("La unidad " + unidad.getIdentificador()
+                    + " no está disponible (" + unidad.getEstado() + ")");
+        }
+
+        BigDecimal descuento = request.getPorcentajeDescuento() == null
+                ? BigDecimal.ZERO : request.getPorcentajeDescuento();
+
+        if (descuento.compareTo(BigDecimal.ZERO) < 0 || descuento.compareTo(DESCUENTO_MAXIMO) > 0) {
+            throw new ValidacionCotizacionException("El descuento debe estar entre 0 % y "
+                    + DESCUENTO_MAXIMO.toPlainString() + " %");
+        }
+
+        Calculo calculo = calcular(unidad.getPrecioLista(), descuento);
+
+        // R003: descuentos mayores al 2 % esperan la autorización del director
+        EstadoCotizacion estado = requiereAutorizacion(descuento)
+                ? EstadoCotizacion.PENDIENTE_AUTORIZACION
+                : EstadoCotizacion.GENERADA;
+
+        LocalDate fecha = hoy.get();
+
+        Cotizacion cotizacion = new Cotizacion(
+                UUID.randomUUID().toString(),
+                unidad.getIdentificador(),
+                cliente.getEmail(),
+                nombreCompleto(cliente),
+                asesor.getEmail(),
+                unidad.getPrecioLista(),
+                descuento,
+                calculo.valorDescuento(),
+                calculo.precioFinal(),
+                calculo.cuotaInicial(),
+                calculo.saldoFinanciar(),
+                fecha.toString(),
+                fecha.plusDays(DIAS_VIGENCIA).toString(),
+                estado,
+                null,
+                null
+        );
+
+        cotizacionRepositorio.guardar(cotizacion);
+
+        return cotizacion;
+    }
+
+    // =====================================================
+    // Cálculos (KAN-96) y regla R003 (KAN-97)
+    // =====================================================
+
+    public record Calculo(BigDecimal valorDescuento, BigDecimal precioFinal,
+                          BigDecimal cuotaInicial, BigDecimal saldoFinanciar) {
+    }
+
+    public static Calculo calcular(BigDecimal precioLista, BigDecimal porcentajeDescuento) {
+
+        BigDecimal valorDescuento = precioLista.multiply(porcentajeDescuento)
+                .divide(CIEN, 0, RoundingMode.HALF_UP);
+
+        BigDecimal precioFinal = precioLista.subtract(valorDescuento);
+
+        BigDecimal cuotaInicial = precioFinal.multiply(PORCENTAJE_CUOTA_INICIAL)
+                .divide(CIEN, 0, RoundingMode.HALF_UP);
+
+        BigDecimal saldoFinanciar = precioFinal.subtract(cuotaInicial);
+
+        return new Calculo(valorDescuento, precioFinal, cuotaInicial, saldoFinanciar);
+    }
+
+    public static boolean requiereAutorizacion(BigDecimal porcentajeDescuento) {
+        return porcentajeDescuento.compareTo(DESCUENTO_SIN_AUTORIZACION) > 0;
+    }
+
+    // =====================================================
+    // Consultar (marca las vencidas, KAN-99)
+    // =====================================================
+
+    public List<Cotizacion> listar() {
+
+        List<Cotizacion> resultado = new ArrayList<>();
+
+        for (Cotizacion cotizacion : cotizacionRepositorio.listar()) {
+            resultado.add(revisarVencimiento(cotizacion));
+        }
+
+        resultado.sort(Comparator.comparing(Cotizacion::getFechaCreacion,
+                Comparator.nullsLast(Comparator.reverseOrder())));
+
+        return resultado;
+    }
+
+    public List<Cotizacion> listarPorCliente(String emailCliente) {
+        return listar().stream()
+                .filter(c -> c.getEmailCliente().equalsIgnoreCase(texto(emailCliente)))
+                .toList();
+    }
+
+    public List<Cotizacion> listarPendientes() {
+        return listar().stream()
+                .filter(c -> c.getEstado() == EstadoCotizacion.PENDIENTE_AUTORIZACION)
+                .toList();
+    }
+
+    private Cotizacion revisarVencimiento(Cotizacion cotizacion) {
+
+        if (cotizacion.estaVencida(hoy.get())) {
+            Cotizacion vencida = cotizacion.conEstado(EstadoCotizacion.VENCIDA, null,
+                    "Venció sin firmarse");
+            cotizacionRepositorio.actualizar(vencida);
+            return vencida;
+        }
+
+        return cotizacion;
+    }
+
+    private Cotizacion buscar(String id) {
+
+        Cotizacion cotizacion = cotizacionRepositorio.buscarPorId(id);
+
+        if (cotizacion == null) {
+            throw new ValidacionCotizacionException("No se encontró la cotización");
+        }
+
+        return revisarVencimiento(cotizacion);
+    }
+
+    // =====================================================
+    // Autorizar / rechazar (director comercial)
+    // =====================================================
+
+    public Cotizacion autorizar(String id, AccionCotizacionRequest request) {
+        return decidir(id, request, EstadoCotizacion.GENERADA);
+    }
+
+    public Cotizacion rechazar(String id, AccionCotizacionRequest request) {
+        return decidir(id, request, EstadoCotizacion.RECHAZADA);
+    }
+
+    private Cotizacion decidir(String id, AccionCotizacionRequest request, EstadoCotizacion nuevoEstado) {
+
+        Usuario director = exigirRol(request == null ? null : request.getEmail(),
+                "Solo el director comercial puede autorizar descuentos", Rol.DIRECTOR_COMERCIAL);
+
+        Cotizacion cotizacion = buscar(id);
+
+        if (cotizacion.getEstado() != EstadoCotizacion.PENDIENTE_AUTORIZACION) {
+            throw new ValidacionCotizacionException("La cotización no está pendiente de autorización (estado "
+                    + cotizacion.getEstado() + ")");
+        }
+
+        Cotizacion actualizada = cotizacion.conEstado(nuevoEstado, director.getEmail(),
+                request.getObservacion());
+
+        cotizacionRepositorio.actualizar(actualizada);
+
+        return actualizada;
+    }
+
+    // =====================================================
+    // Firmar (cliente)
+    // =====================================================
+
+    public Cotizacion firmar(String id, AccionCotizacionRequest request) {
+
+        String email = request == null ? null : texto(request.getEmail());
+        Cotizacion cotizacion = buscar(id);
+
+        if (email == null || !cotizacion.getEmailCliente().equalsIgnoreCase(email)) {
+            throw new ValidacionCotizacionException("Solo el cliente de la cotización puede firmarla");
+        }
+
+        switch (cotizacion.getEstado()) {
+            case GENERADA -> { }
+            case PENDIENTE_AUTORIZACION -> throw new ValidacionCotizacionException(
+                    "El descuento aún no ha sido autorizado por el director comercial");
+            case VENCIDA -> throw new ValidacionCotizacionException(
+                    "La cotización venció el " + cotizacion.getFechaVencimiento());
+            default -> throw new ValidacionCotizacionException(
+                    "La cotización no se puede firmar (estado " + cotizacion.getEstado() + ")");
+        }
+
+        Unidad unidad = unidadRepositorio.buscarPorIdentificador(cotizacion.getIdentificadorUnidad());
+
+        if (unidad == null || unidad.getEstado() != EstadoUnidad.DISPONIBLE) {
+            throw new ValidacionCotizacionException("La unidad ya no está disponible");
+        }
+
+        Cotizacion firmada = cotizacion.conEstado(EstadoCotizacion.FIRMADA, null, null);
+        cotizacionRepositorio.actualizar(firmada);
+
+        return firmada;
+    }
+
+    // =====================================================
+    // Utilidades
+    // =====================================================
+
+    private Usuario exigirRol(String email, String mensaje, Rol... roles) {
+
+        Usuario usuario = email == null ? null : usuarioRepositorio.buscarPorEmail(texto(email));
+
+        if (usuario != null) {
+            for (Rol rol : roles) {
+                if (usuario.getRol() == rol) {
+                    return usuario;
+                }
+            }
+        }
+
+        throw new ValidacionCotizacionException(mensaje);
+    }
+
+    private static String nombreCompleto(Cliente cliente) {
+        return (cliente.getNombre() + " " + cliente.getPrimerApellido() + " "
+                + (cliente.getSegundoApellido() == null ? "" : cliente.getSegundoApellido())).trim();
+    }
+
+    private static String texto(String valor) {
+        return valor == null ? null : valor.trim();
+    }
+}

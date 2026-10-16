@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import venta_condominio.model.RegistroClienteRequest;
 import venta_condominio.service.ClienteService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,4 +42,10 @@ public class ClienteController {
             );
         }
     }
-}
+
+    /** Resumen de clientes para el formulario de cotización (F-03). */
+    @GetMapping
+    public ResponseEntity<List<Map<String, Object>>> listarClientes() {
+        return ResponseEntity.ok(clienteService.listarResumen());
+    }
+}

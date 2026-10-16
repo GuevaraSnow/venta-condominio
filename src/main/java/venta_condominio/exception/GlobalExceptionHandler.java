@@ -36,4 +36,13 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("mensaje", exception.getMessage()));
     }
+
+    @ExceptionHandler(ValidacionCotizacionException.class)
+    public ResponseEntity<Map<String, String>> manejarValidacionCotizacionException(
+            ValidacionCotizacionException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("mensaje", exception.getMessage()));
+    }
 }
