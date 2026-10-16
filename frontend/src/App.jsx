@@ -48,6 +48,9 @@ function App() {
   const [errorUnidades, setErrorUnidades] = useState("");
   const [unidadSeleccionada, setUnidadSeleccionada] = useState(null);
 
+  // Si no es null, el formulario de "Crear unidad" está editando esta unidad
+  const [unidadEditando, setUnidadEditando] = useState(null);
+
   // Filtros del listado (VC-39)
   const [filtroCiudad, setFiltroCiudad] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
@@ -394,12 +397,51 @@ function App() {
   // CREAR UNIDAD (Administrador / Director comercial)
   // =========================================================
 
+  const formUnidadVacio = {
+    identificador: "",
+    tipoInmueble: "",
+    precioLista: "",
+    area: "",
+    habitaciones: "",
+    banos: "",
+    descripcion: "",
+    departamento: "",
+    municipio: "",
+  };
+
+  const editarUnidad = (unidad) => {
+    setFormUnidad({
+      identificador: unidad.identificador,
+      tipoInmueble: unidad.tipoInmueble,
+      precioLista: String(unidad.precioLista ?? ""),
+      area: String(unidad.area ?? ""),
+      habitaciones: String(unidad.habitaciones ?? ""),
+      banos: String(unidad.banos ?? ""),
+      descripcion: unidad.descripcion || "",
+      departamento: unidad.departamento,
+      municipio: unidad.municipio?.nombre || "",
+    });
+    setUnidadEditando(unidad);
+    setPestanaActiva("crear");
+    setVista("panel");
+  };
+
+  const cancelarEdicion = () => {
+    setUnidadEditando(null);
+    setFormUnidad(formUnidadVacio);
+    setPestanaActiva("unidades");
+  };
+
   const crearUnidad = async (evento) => {
     evento.preventDefault();
 
+    const url = unidadEditando
+        ? `${API_URL}/unidades/${encodeURIComponent(unidadEditando.identificador)}`
+        : `${API_URL}/unidades`;
+
     try {
-      const respuesta = await fetch(`${API_URL}/unidades`, {
-        method: "POST",
+      const respuesta = await fetch(url, {
+        method: unidadEditando ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -416,30 +458,32 @@ function App() {
             nombre: formUnidad.municipio,
             departamento: formUnidad.departamento,
           },
-          estado: "DISPONIBLE",
+          // Al editar se conservan el estado y las fotos que ya tenía
+          estado: unidadEditando ? unidadEditando.estado : "DISPONIBLE",
+          fotos: unidadEditando ? unidadEditando.fotos : [],
         }),
       });
 
       const datos = await respuesta.json();
 
       if (!respuesta.ok) {
-        alert(datos.mensaje || "No se pudo crear la unidad");
+        alert(
+            datos.mensaje ||
+            (unidadEditando
+                ? "No se pudo actualizar la unidad"
+                : "No se pudo crear la unidad")
+        );
         return;
       }
 
-      alert(datos.mensaje || "Unidad creada correctamente");
+      alert(
+          unidadEditando
+              ? "Unidad actualizada correctamente"
+              : datos.mensaje || "Unidad creada correctamente"
+      );
 
-      setFormUnidad({
-        identificador: "",
-        tipoInmueble: "",
-        precioLista: "",
-        area: "",
-        habitaciones: "",
-        banos: "",
-        descripcion: "",
-        departamento: "",
-        municipio: "",
-      });
+      setUnidadEditando(null);
+      setFormUnidad(formUnidadVacio);
 
       await cargarUnidadesDisponibles();
       setPestanaActiva("unidades");
@@ -979,7 +1023,13 @@ function App() {
                                   ? "tab-button tab-button-activo"
                                   : "tab-button"
                             }
-                            onClick={() => setPestanaActiva(pestana)}
+                            onClick={() => {
+                              if (unidadEditando) {
+                                setUnidadEditando(null);
+                                setFormUnidad(formUnidadVacio);
+                              }
+                              setPestanaActiva(pestana);
+                            }}
                         >
                           {ETIQUETAS_PESTANA[pestana]}
                         </button>
@@ -1123,10 +1173,12 @@ function App() {
 
                   {pestanaActiva === "crear" && (
                       <form className="auth-form" onSubmit={crearUnidad}>
-                        <h2>Crear unidad</h2>
+                        <h2>{unidadEditando ? "Editar unidad" : "Crear unidad"}</h2>
 
                         <p className="form-description">
-                          Registra un nuevo condominio disponible para la venta
+                          {unidadEditando
+                              ? `Modifica los datos de "${unidadEditando.identificador}". Las fotos y el estado se conservan.`
+                              : "Registra un nuevo condominio disponible para la venta"}
                         </p>
 
                         <div className="form-grid">
@@ -1262,8 +1314,18 @@ function App() {
                         </div>
 
                         <button type="submit" className="primary-button">
-                          Crear unidad
+                          {unidadEditando ? "Guardar cambios" : "Crear unidad"}
                         </button>
+
+                        {unidadEditando && (
+                            <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={cancelarEdicion}
+                            >
+                              Cancelar
+                            </button>
+                        )}
                       </form>
                   )}
 
@@ -1358,6 +1420,17 @@ function App() {
                       <p className="form-description">
                         Esta unidad todavía no tiene fotos.
                       </p>
+                  )}
+
+                  {(usuarioActual?.rol === "DIRECTOR_COMERCIAL" ||
+                      usuarioActual?.rol === "ADMINISTRADOR_CONJUNTO") && (
+                      <button
+                          type="button"
+                          className="primary-button"
+                          onClick={() => editarUnidad(unidadSeleccionada)}
+                      >
+                        Editar unidad
+                      </button>
                   )}
 
                   {(usuarioActual?.rol === "DIRECTOR_COMERCIAL" ||

@@ -107,4 +107,22 @@ public class UnidadController {
             );
         }
     }
+
+    @PutMapping("/{identificador}")
+    public ResponseEntity<?> actualizarUnidad(
+            @PathVariable String identificador,
+            @RequestBody Unidad unidad) {
+
+        try {
+            Unidad actualizada = unidadService.actualizarUnidad(identificador, unidad);
+
+            return ResponseEntity.ok(actualizada);
+
+        } catch (ValidacionUnidadException e) {
+
+            return ResponseEntity.badRequest().body(
+                    Map.of("mensaje", e.getMessage())
+            );
+        }
+    }
 }

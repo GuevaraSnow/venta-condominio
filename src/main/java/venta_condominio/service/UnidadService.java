@@ -64,4 +64,45 @@ public class UnidadService {
             throw new ValidacionUnidadException("No se encontró la unidad " + identificador);
         }
     }
+
+    /**
+     * Reemplaza los datos de una unidad existente. Permite cambiar también
+     * el identificador. Si no llegan fotos, se conservan las que ya tenía.
+     */
+    public Unidad actualizarUnidad(String identificadorOriginal, Unidad datos) {
+
+        Unidad existente = unidadRepositorio.buscarPorIdentificador(identificadorOriginal);
+
+        if (existente == null) {
+            throw new ValidacionUnidadException("No se encontró la unidad " + identificadorOriginal);
+        }
+
+        boolean cambiaIdentificador =
+                !identificadorOriginal.equalsIgnoreCase(datos.getIdentificador());
+
+        if (cambiaIdentificador
+                && unidadRepositorio.buscarPorIdentificador(datos.getIdentificador()) != null) {
+            throw new ValidacionUnidadException(
+                    "Ya existe una unidad con el identificador " + datos.getIdentificador());
+        }
+
+        Unidad actualizada = new Unidad(
+                datos.getIdentificador(),
+                datos.getTipoInmueble(),
+                datos.getPrecioLista(),
+                datos.getArea(),
+                datos.getHabitaciones(),
+                datos.getBanos(),
+                datos.getDescripcion(),
+                datos.getDepartamento(),
+                datos.getMunicipio(),
+                datos.getEstado(),
+                datos.getFotos().isEmpty() ? existente.getFotos() : datos.getFotos()
+        );
+
+        unidadRepositorio.eliminar(identificadorOriginal);
+        unidadRepositorio.guardar(actualizada);
+
+        return actualizada;
+    }
 }
