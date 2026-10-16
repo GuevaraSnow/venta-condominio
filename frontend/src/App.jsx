@@ -1064,7 +1064,7 @@ function App() {
                             <>
                               <div className="units-filtros">
                                 <div className="input-group">
-                                  <label>Ver</label>
+                                  <label>Tipo de inmueble</label>
                                   <select
                                       value={filtroTipo}
                                       onChange={(evento) => {
