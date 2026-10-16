@@ -86,8 +86,13 @@ public class Usuario {
         return fechaAceptacionDatos;
     }
 
+    public Usuario conContrasena(String nuevaContrasena) {
+        return new Usuario(id, nombre, email, nuevaContrasena, rol, activo, fotoPerfil,
+                aceptoTratamientoDatos, fechaAceptacionDatos);
+    }
+
     public Usuario conFotoPerfil(String nuevaFoto) {
         return new Usuario(id, nombre, email, contrasena, rol, activo, nuevaFoto,
                 aceptoTratamientoDatos, fechaAceptacionDatos);
     }
-}
+}

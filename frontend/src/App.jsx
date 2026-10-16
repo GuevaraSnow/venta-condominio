@@ -19,6 +19,16 @@ const ETIQUETAS_PESTANA = {
 function App() {
   const [vista, setVista] = useState("login");
   const [codigoVerificacion, setCodigoVerificacion] = useState("");
+
+  // Recuperar contraseña (AC-05): paso 1 = pedir código, paso 2 = nueva contraseña
+  const [recuperacion, setRecuperacion] = useState({
+    paso: 1,
+    email: "",
+    codigo: "",
+    nuevaContrasena: "",
+    confirmarContrasena: "",
+    enviando: false,
+  });
   const [usuarioActual, setUsuarioActual] = useState(null);
   const [pestanaActiva, setPestanaActiva] = useState("unidades");
   const [mostrarHabeasData, setMostrarHabeasData] = useState(false);
@@ -185,6 +195,98 @@ function App() {
     } catch (error) {
       console.error(error);
       alert("No se pudo conectar con el servidor");
+    }
+  };
+
+  // =========================================================
+  // RECUPERAR CONTRASEÑA (AC-05)
+  // =========================================================
+
+  const abrirRecuperacion = () => {
+    setRecuperacion({
+      paso: 1,
+      email: formulario.email || "",
+      codigo: "",
+      nuevaContrasena: "",
+      confirmarContrasena: "",
+      enviando: false,
+    });
+    setVista("recuperar");
+  };
+
+  const manejarCambioRecuperacion = (evento) => {
+    const { name, value } = evento.target;
+    setRecuperacion((anterior) => ({ ...anterior, [name]: value }));
+  };
+
+  const solicitarCodigoRecuperacion = async (evento) => {
+    evento?.preventDefault();
+    setRecuperacion((anterior) => ({ ...anterior, enviando: true }));
+
+    try {
+      const respuesta = await fetch(`${API_URL}/usuarios/recuperar-contrasena`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recuperacion.email }),
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        alert(datos.mensaje || "No se pudo enviar el código");
+        return;
+      }
+
+      alert(datos.mensaje);
+      setRecuperacion((anterior) => ({ ...anterior, paso: 2 }));
+    } catch (error) {
+      console.error(error);
+      alert("No se pudo conectar con el servidor");
+    } finally {
+      setRecuperacion((anterior) => ({ ...anterior, enviando: false }));
+    }
+  };
+
+  const restablecerContrasena = async (evento) => {
+    evento.preventDefault();
+
+    if (recuperacion.nuevaContrasena !== recuperacion.confirmarContrasena) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+
+    setRecuperacion((anterior) => ({ ...anterior, enviando: true }));
+
+    try {
+      const respuesta = await fetch(`${API_URL}/usuarios/restablecer-contrasena`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: recuperacion.email,
+          codigo: recuperacion.codigo,
+          nuevaContrasena: recuperacion.nuevaContrasena,
+        }),
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        alert(datos.mensaje || "No se pudo restablecer la contraseña");
+        return;
+      }
+
+      alert(datos.mensaje);
+      setFormulario((anterior) => ({
+        ...anterior,
+        email: recuperacion.email,
+        contrasena: "",
+      }));
+      setVista("login");
+    } catch (error) {
+      console.error(error);
+      alert("No se pudo conectar con el servidor");
+    } finally {
+      setRecuperacion((anterior) => ({ ...anterior, enviando: false }));
     }
   };
 
@@ -724,9 +826,7 @@ function App() {
                   <div className="forgot-password">
                     <button
                         type="button"
-                        onClick={() =>
-                            alert("Esta opción se implementará próximamente.")
-                        }
+                        onClick={abrirRecuperacion}
                     >
                       ¿Olvidaste tu contraseña?
                     </button>
@@ -747,6 +847,124 @@ function App() {
                       Crear cuenta
                     </button>
                   </div>
+                </form>
+            )}
+
+            {/* =================================================
+              RECUPERAR CONTRASEÑA (AC-05)
+          ================================================== */}
+
+            {vista === "recuperar" && recuperacion.paso === 1 && (
+                <form className="auth-form" onSubmit={solicitarCodigoRecuperacion}>
+                  <h2>Recuperar contraseña</h2>
+
+                  <p className="form-description">
+                    Escribe el correo de tu cuenta y te enviaremos un código de 6
+                    dígitos. El código vence en 10 minutos.
+                  </p>
+
+                  <div className="input-group">
+                    <label>Correo electrónico</label>
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="correo@ejemplo.com"
+                        value={recuperacion.email}
+                        onChange={manejarCambioRecuperacion}
+                        required
+                    />
+                  </div>
+
+                  <button
+                      type="submit"
+                      className="primary-button"
+                      disabled={recuperacion.enviando}
+                  >
+                    {recuperacion.enviando ? "Enviando..." : "Enviar código"}
+                  </button>
+
+                  <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setVista("login")}
+                  >
+                    Volver a iniciar sesión
+                  </button>
+                </form>
+            )}
+
+            {vista === "recuperar" && recuperacion.paso === 2 && (
+                <form className="auth-form" onSubmit={restablecerContrasena}>
+                  <h2>Nueva contraseña</h2>
+
+                  <p className="form-description">
+                    Si <strong>{recuperacion.email}</strong> está registrado, te
+                    llegó un código. Revisa también la carpeta de spam.
+                  </p>
+
+                  <div className="input-group">
+                    <label>Código de verificación</label>
+                    <input
+                        name="codigo"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="123456"
+                        value={recuperacion.codigo}
+                        onChange={manejarCambioRecuperacion}
+                        required
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label>Nueva contraseña</label>
+                    <input
+                        type="password"
+                        name="nuevaContrasena"
+                        placeholder="Mínimo 6 caracteres"
+                        minLength={6}
+                        value={recuperacion.nuevaContrasena}
+                        onChange={manejarCambioRecuperacion}
+                        required
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label>Confirmar contraseña</label>
+                    <input
+                        type="password"
+                        name="confirmarContrasena"
+                        placeholder="Repite la contraseña"
+                        minLength={6}
+                        value={recuperacion.confirmarContrasena}
+                        onChange={manejarCambioRecuperacion}
+                        required
+                    />
+                  </div>
+
+                  <button
+                      type="submit"
+                      className="primary-button"
+                      disabled={recuperacion.enviando}
+                  >
+                    {recuperacion.enviando ? "Guardando..." : "Cambiar contraseña"}
+                  </button>
+
+                  <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => solicitarCodigoRecuperacion()}
+                      disabled={recuperacion.enviando}
+                  >
+                    Reenviar código
+                  </button>
+
+                  <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setVista("login")}
+                  >
+                    Volver a iniciar sesión
+                  </button>
                 </form>
             )}
 
