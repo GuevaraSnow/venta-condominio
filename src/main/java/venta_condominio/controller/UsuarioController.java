@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import venta_condominio.exception.UsuarioException;
 import venta_condominio.model.FotoPerfilRequest;
 import venta_condominio.model.LoginRequest;
+import venta_condominio.model.Cliente;
 import venta_condominio.model.Usuario;
+import venta_condominio.repository.ClienteRepositorio;
 import venta_condominio.service.UsuarioService;
 
 @RestController
@@ -16,9 +18,12 @@ import venta_condominio.service.UsuarioService;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final ClienteRepositorio clienteRepositorio;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService,
+                             ClienteRepositorio clienteRepositorio) {
         this.usuarioService = usuarioService;
+        this.clienteRepositorio = clienteRepositorio;
     }
 
     @PostMapping
@@ -87,7 +92,23 @@ public class UsuarioController {
                 "nombre", usuario.getNombre(),
                 "email", usuario.getEmail(),
                 "rol", usuario.getRol().toString(),
-                "fotoPerfil", usuario.getFotoPerfil() != null ? usuario.getFotoPerfil() : ""
+                "fotoPerfil", usuario.getFotoPerfil() != null ? usuario.getFotoPerfil() : "",
+                "interesPrincipal", interesPrincipal(usuario)
         );
     }
-}
+
+    /**
+     * Tipo de inmueble (CASA o APARTAMENTO) que el cliente eligió al
+     * registrarse. Para roles internos o clientes sin registro devuelve "".
+     */
+    private String interesPrincipal(Usuario usuario) {
+
+        Cliente cliente = clienteRepositorio.buscarPorEmail(usuario.getEmail());
+
+        if (cliente == null || cliente.getTipoInmueble() == null) {
+            return "";
+        }
+
+        return cliente.getTipoInmueble();
+    }
+}

@@ -55,4 +55,13 @@ public class UnidadService {
 
         return actualizada;
     }
+
+    public void eliminarUnidad(String identificador) {
+
+        boolean eliminada = unidadRepositorio.eliminar(identificador);
+
+        if (!eliminada) {
+            throw new ValidacionUnidadException("No se encontró la unidad " + identificador);
+        }
+    }
 }

@@ -60,6 +60,11 @@ public class Unidad {
             throw new ValidacionUnidadException("El municipio es obligatorio");
         }
 
+        // Por ahora el proyecto solo vende unidades en el Quindío
+        if (departamento != Departamento.QUINDIO) {
+            throw new ValidacionUnidadException("Por ahora solo se registran unidades en el Quindío");
+        }
+
         this.identificador = identificador;
         this.tipoInmueble = tipoInmueble;
         this.precioLista = precioLista;
@@ -135,4 +140,4 @@ public class Unidad {
                 municipio, estado, fotosActualizadas
         );
     }
-}
+}

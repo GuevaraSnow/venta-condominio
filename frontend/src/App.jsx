@@ -49,7 +49,7 @@ function App() {
   const [unidadSeleccionada, setUnidadSeleccionada] = useState(null);
 
   // Filtros del listado (VC-39)
-  const [filtroDepartamento, setFiltroDepartamento] = useState("");
+  const [filtroCiudad, setFiltroCiudad] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
 
   const [formUnidad, setFormUnidad] = useState({
@@ -64,20 +64,22 @@ function App() {
     municipio: "",
   });
 
+  // Solo operamos en el Quindío: sus 12 municipios
   const departamentos = {
     QUINDIO: [
       "Armenia",
+      "Buenavista",
       "Calarcá",
       "Circasia",
+      "Córdoba",
+      "Filandia",
+      "Génova",
+      "La Tebaida",
       "Montenegro",
+      "Pijao",
       "Quimbaya",
       "Salento",
-      "Filandia",
     ],
-    RISARALDA: ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
-    CALDAS: ["Manizales", "Chinchiná", "Villamaría"],
-    ANTIOQUIA: ["Medellín", "Envigado", "Bello"],
-    VALLE_DEL_CAUCA: ["Cali", "Palmira", "Buga"],
   };
 
   const manejarCambio = (evento) => {
@@ -163,6 +165,11 @@ function App() {
       }
 
       setUsuarioActual(datos);
+
+      // El listado arranca mostrando lo que el cliente eligió al registrarse
+      // (CASA o APARTAMENTO). Para roles internos viene vacío: "Ver todo".
+      setFiltroTipo(datos.interesPrincipal || "");
+      setFiltroCiudad("");
 
       const pestanasDisponibles = PESTANAS_POR_ROL[datos.rol] || ["unidades"];
 
@@ -448,13 +455,23 @@ function App() {
 
   // Filtrado en el cliente: ya tenemos todas las disponibles cargadas
   const unidadesFiltradas = unidades.filter((unidad) => {
-    const coincideDepartamento =
-        !filtroDepartamento || unidad.departamento === filtroDepartamento;
+    const coincideCiudad =
+        !filtroCiudad || unidad.municipio?.nombre === filtroCiudad;
 
     const coincideTipo = !filtroTipo || unidad.tipoInmueble === filtroTipo;
 
-    return coincideDepartamento && coincideTipo;
+    return coincideCiudad && coincideTipo;
   });
+
+  // Ciudades que realmente tienen unidades, en orden alfabético
+  const ciudadesDisponibles = [
+    ...new Set(
+        unidades
+            .filter((unidad) => !filtroTipo || unidad.tipoInmueble === filtroTipo)
+            .map((unidad) => unidad.municipio?.nombre)
+            .filter(Boolean)
+    ),
+  ].sort((a, b) => a.localeCompare(b, "es"));
 
   // =========================================================
   // FOTOS DE UNIDAD (VC-38, solo Director comercial / Administrador)
@@ -997,46 +1014,47 @@ function App() {
                             <>
                               <div className="units-filtros">
                                 <div className="input-group">
-                                  <label>Departamento</label>
+                                  <label>Ver</label>
                                   <select
-                                      value={filtroDepartamento}
+                                      value={filtroTipo}
+                                      onChange={(evento) => {
+                                        setFiltroTipo(evento.target.value);
+                                        setFiltroCiudad("");
+                                      }}
+                                  >
+                                    <option value="">Ver todo</option>
+                                    <option value="CASA">Casas</option>
+                                    <option value="APARTAMENTO">Apartamentos</option>
+                                  </select>
+                                </div>
+
+                                <div className="input-group">
+                                  <label>Ciudad</label>
+                                  <select
+                                      value={filtroCiudad}
                                       onChange={(evento) =>
-                                          setFiltroDepartamento(evento.target.value)
+                                          setFiltroCiudad(evento.target.value)
                                       }
                                   >
-                                    <option value="">Todos</option>
-                                    {Object.keys(departamentos).map((departamento) => (
-                                        <option key={departamento} value={departamento}>
-                                          {departamento.replaceAll("_", " ")}
+                                    <option value="">Todas las ciudades</option>
+                                    {ciudadesDisponibles.map((ciudad) => (
+                                        <option key={ciudad} value={ciudad}>
+                                          {ciudad}
                                         </option>
                                     ))}
                                   </select>
                                 </div>
 
-                                <div className="input-group">
-                                  <label>Tipo de inmueble</label>
-                                  <select
-                                      value={filtroTipo}
-                                      onChange={(evento) =>
-                                          setFiltroTipo(evento.target.value)
-                                      }
-                                  >
-                                    <option value="">Todos</option>
-                                    <option value="APARTAMENTO">Apartamento</option>
-                                    <option value="CASA">Casa</option>
-                                  </select>
-                                </div>
-
-                                {(filtroDepartamento || filtroTipo) && (
+                                {(filtroCiudad || filtroTipo) && (
                                     <button
                                         type="button"
                                         className="secondary-button units-filtros-limpiar"
                                         onClick={() => {
-                                          setFiltroDepartamento("");
+                                          setFiltroCiudad("");
                                           setFiltroTipo("");
                                         }}
                                     >
-                                      Limpiar filtros
+                                      Ver todo
                                     </button>
                                 )}
                               </div>

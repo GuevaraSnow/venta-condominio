@@ -126,4 +126,29 @@ public class UnidadRepositorioJson implements UnidadRepositorio {
             throw new RuntimeException("No se pudo actualizar la unidad", e);
         }
     }
+
+    @Override
+    public boolean eliminar(String identificador) {
+
+        List<Unidad> unidades = listar();
+
+        boolean eliminada = unidades.removeIf(
+                u -> u.getIdentificador().equalsIgnoreCase(identificador)
+        );
+
+        if (!eliminada) {
+            return false;
+        }
+
+        try {
+            Almacenamiento.escribirTexto(rutaArchivo,
+                    objectMapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(unidades));
+
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo eliminar la unidad", e);
+        }
+
+        return true;
+    }
 }

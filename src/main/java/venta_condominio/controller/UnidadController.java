@@ -89,4 +89,22 @@ public class UnidadController {
             );
         }
     }
-}
+
+    @DeleteMapping("/{identificador}")
+    public ResponseEntity<?> eliminarUnidad(@PathVariable String identificador) {
+
+        try {
+            unidadService.eliminarUnidad(identificador);
+
+            return ResponseEntity.ok(
+                    Map.of("mensaje", "Unidad eliminada correctamente")
+            );
+
+        } catch (ValidacionUnidadException e) {
+
+            return ResponseEntity.status(404).body(
+                    Map.of("mensaje", e.getMessage())
+            );
+        }
+    }
+}

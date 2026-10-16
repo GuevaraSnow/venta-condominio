@@ -16,4 +16,6 @@ public interface UnidadRepositorio {
     List<Unidad> listarPorEstado(EstadoUnidad estado);
 
     void actualizar(Unidad unidad);
-}
+
+    boolean eliminar(String identificador);
+}
