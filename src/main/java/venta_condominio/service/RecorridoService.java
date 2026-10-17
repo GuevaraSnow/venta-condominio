@@ -1,6 +1,8 @@
 package venta_condominio.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Comparator;
@@ -30,7 +32,8 @@ import venta_condominio.patrones.PublicadorEventos;
  * F-02 Recorrer el conjunto: agendar, iniciar, finalizar y cancelar visitas.
  *
  *  - R001: solo clientes con registro completo pueden visitar una unidad
- *  - Horario de visitas: 8:00 a 17:00, desde hoy en adelante
+ *  - Horario de visitas: 8:00 a 17:00, desde hoy en adelante y nunca en una hora que ya pasó
+ *  - Un cliente no puede tener dos visitas a la misma hora, ni dos visitas pendientes a la misma unidad
  *  - Al iniciar, la unidad pasa a EN_RECORRIDO; al finalizar vuelve a DISPONIBLE (F-12)
  */
 @Service
@@ -44,7 +47,10 @@ public class RecorridoService extends PublicadorEventos {
     private final ClienteRepositorio clienteRepositorio;
     private final UsuarioRepositorio usuarioRepositorio;
 
-    private Supplier<LocalDate> hoy = LocalDate::now;
+    /** Hora de Colombia: el servidor en la nube corre en UTC. */
+    private static final ZoneId ZONA = ZoneId.of("America/Bogota");
+
+    private Supplier<LocalDateTime> ahora = () -> LocalDateTime.now(ZONA);
 
     public RecorridoService(RecorridoRepositorio recorridoRepositorio,
                             UnidadRepositorio unidadRepositorio,
@@ -57,7 +63,11 @@ public class RecorridoService extends PublicadorEventos {
     }
 
     void setHoy(Supplier<LocalDate> hoy) {
-        this.hoy = hoy;
+        this.ahora = () -> hoy.get().atStartOfDay();
+    }
+
+    void setAhora(Supplier<LocalDateTime> ahora) {
+        this.ahora = ahora;
     }
 
     // =====================================================
@@ -82,7 +92,7 @@ public class RecorridoService extends PublicadorEventos {
         Cliente cliente = emailCliente == null ? null : clienteRepositorio.buscarPorEmail(emailCliente);
 
         if (cliente == null) {
-            throw new ValidacionRecorridoException("El cliente debe estar registrado para agendar un recorrido (R001)");
+            throw new ValidacionRecorridoException("El cliente debe completar su registro para agendar un recorrido");
         }
 
         Unidad unidad = unidadRepositorio.buscarPorIdentificador(texto(request.getIdentificadorUnidad()));
@@ -106,12 +116,38 @@ public class RecorridoService extends PublicadorEventos {
             throw new ValidacionRecorridoException("Indica una fecha y una hora válidas");
         }
 
-        if (fecha.isBefore(hoy.get())) {
+        LocalDateTime momentoActual = ahora.get();
+
+        if (fecha.isBefore(momentoActual.toLocalDate())) {
             throw new ValidacionRecorridoException("La fecha del recorrido no puede ser anterior a hoy");
         }
 
         if (hora.isBefore(HORA_INICIO) || hora.isAfter(HORA_FIN)) {
             throw new ValidacionRecorridoException("Los recorridos se agendan entre las 8:00 y las 17:00");
+        }
+
+        if (!fecha.atTime(hora).isAfter(momentoActual)) {
+            throw new ValidacionRecorridoException("Esa hora ya pasó. Elige una hora posterior a la actual");
+        }
+
+        boolean esElCliente = quien.getRol() == Rol.CLIENTE;
+        List<Recorrido> pendientesDelCliente = recorridoRepositorio.listar().stream()
+                .filter(r -> r.getEmailCliente().equalsIgnoreCase(cliente.getEmail()))
+                .filter(r -> r.getEstado() == EstadoRecorrido.AGENDADO || r.getEstado() == EstadoRecorrido.EN_CURSO)
+                .toList();
+
+        if (pendientesDelCliente.stream().anyMatch(r ->
+                r.getFecha().equals(fecha.toString()) && r.getHora().equals(hora.toString()))) {
+            throw new ValidacionRecorridoException(esElCliente
+                    ? "Ya tienes un recorrido agendado ese día a esa hora"
+                    : "El cliente ya tiene un recorrido agendado ese día a esa hora");
+        }
+
+        if (pendientesDelCliente.stream().anyMatch(r ->
+                r.getIdentificadorUnidad().equalsIgnoreCase(unidad.getIdentificador()))) {
+            throw new ValidacionRecorridoException(esElCliente
+                    ? "Ya tienes un recorrido pendiente para esta unidad. Cancélalo si quieres cambiar la fecha"
+                    : "El cliente ya tiene un recorrido pendiente para esta unidad");
         }
 
         boolean ocupado = recorridoRepositorio.listar().stream().anyMatch(r ->

@@ -8,6 +8,8 @@ import "./Cotizaciones.css";
 // - Asesor / director: agenda de recorridos (KAN-182): agendar para un
 //   cliente, iniciar (unidad EN_RECORRIDO), finalizar (vuelve a DISPONIBLE)
 // R001: solo clientes registrados pueden agendar (lo valida el backend).
+// El backend también impide horas pasadas, cruces de horario del cliente y
+// dos recorridos pendientes del mismo cliente a la misma unidad.
 // =========================================================
 
 const HORAS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
@@ -23,6 +25,53 @@ const hoyIso = () => {
   const d = new Date();
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 };
+
+const mananaIso = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
+
+// Si el día es hoy, solo se ofrecen las horas que aún no han pasado
+const horasDisponibles = (dia) => {
+  if (dia !== hoyIso()) return HORAS;
+
+  const ahora = new Date();
+  const minutosAhora = ahora.getHours() * 60 + ahora.getMinutes();
+
+  return HORAS.filter((h) => {
+    const [hh, mm] = h.split(":").map(Number);
+    return hh * 60 + mm > minutosAhora;
+  });
+};
+
+// Primer día con horas libres (hoy, o mañana si ya pasó el horario)
+const primerDia = () => (horasDisponibles(hoyIso()).length > 0 ? hoyIso() : mananaIso());
+
+function SelectorHora({ dia, hora, onChange, name }) {
+  const opciones = horasDisponibles(dia);
+
+  // Si la hora elegida ya no es válida para el día, se pasa a la primera libre
+  useEffect(() => {
+    if (opciones.length > 0 && !opciones.includes(hora)) {
+      onChange({ target: { name: name || "hora", value: opciones[0] } });
+    }
+  }, [dia]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (opciones.length === 0) {
+    return <p className="cot-mensaje cot-mensaje-error">Ya no quedan horarios hoy. Elige otro día.</p>;
+  }
+
+  return (
+    <select name={name} value={opciones.includes(hora) ? hora : opciones[0]} onChange={onChange}>
+      {opciones.map((h) => (
+        <option key={h} value={h}>
+          {h}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 const fecha = (iso) =>
   iso
@@ -71,8 +120,8 @@ function Mensaje({ mensaje }) {
 // ---------------------------------------------------------
 export function AgendarRecorrido({ usuario, unidad }) {
   const [abierto, setAbierto] = useState(false);
-  const [dia, setDia] = useState(hoyIso());
-  const [hora, setHora] = useState("10:00");
+  const [dia, setDia] = useState(primerDia());
+  const [hora, setHora] = useState(horasDisponibles(primerDia())[0] || "08:00");
   const [mensaje, setMensaje] = useState(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -126,13 +175,7 @@ export function AgendarRecorrido({ usuario, unidad }) {
 
             <div className="input-group">
               <label>Hora</label>
-              <select value={hora} onChange={(e) => setHora(e.target.value)}>
-                {HORAS.map((h) => (
-                  <option key={h} value={h}>
-                    {h}
-                  </option>
-                ))}
-              </select>
+              <SelectorHora dia={dia} hora={hora} onChange={(e) => setHora(e.target.value)} />
             </div>
           </div>
 
@@ -165,8 +208,8 @@ export default function Recorridos({ usuario, unidades, onCambioUnidades }) {
   const [form, setForm] = useState({
     emailCliente: "",
     identificadorUnidad: "",
-    fecha: hoyIso(),
-    hora: "10:00",
+    fecha: primerDia(),
+    hora: horasDisponibles(primerDia())[0] || "08:00",
   });
 
   useEffect(() => {
@@ -281,17 +324,11 @@ export default function Recorridos({ usuario, unidades, onCambioUnidades }) {
 
             <div className="input-group">
               <label>Hora</label>
-              <select name="hora" value={form.hora} onChange={cambiarForm}>
-                {HORAS.map((h) => (
-                  <option key={h} value={h}>
-                    {h}
-                  </option>
-                ))}
-              </select>
+              <SelectorHora name="hora" dia={form.fecha} hora={form.hora} onChange={cambiarForm} />
             </div>
           </div>
 
-          <p className="cot-fechas">Horario de visitas: 8:00 a 17:00. Solo clientes registrados (R001).</p>
+          <p className="cot-fechas">Horario de visitas: 8:00 a 17:00. Solo clientes registrados.</p>
 
           <button type="submit" className="primary-button">
             Agendar recorrido

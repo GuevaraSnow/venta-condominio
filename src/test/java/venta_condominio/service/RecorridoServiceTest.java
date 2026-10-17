@@ -117,6 +117,32 @@ class RecorridoServiceTest {
     }
 
     @Test
+    void noSeAgendaEnUnaHoraQueYaPaso() {
+        service.setAhora(() -> java.time.LocalDateTime.of(2026, 10, 16, 11, 30));
+
+        assertThrows(ValidacionRecorridoException.class, () -> agendar(CLIENTE, "2026-10-16", "10:00"));
+        agendar(CLIENTE, "2026-10-16", "12:00");
+    }
+
+    @Test
+    void elClienteNoTieneDosRecorridosALaMismaHora() {
+        unidades.guardar(new Unidad("CASA-12", "CASA", new BigDecimal("450000000"), 120, 3, 3, "Prueba",
+                Departamento.QUINDIO, new Municipio("Armenia", Departamento.QUINDIO), EstadoUnidad.DISPONIBLE, List.of()));
+
+        agendar(CLIENTE, "2026-10-20", "10:00");
+
+        assertThrows(ValidacionRecorridoException.class,
+                () -> service.agendar(new RecorridoRequest("CASA-12", CLIENTE, CLIENTE, "2026-10-20", "10:00")));
+    }
+
+    @Test
+    void elClienteNoAgendaDosVecesLaMismaUnidad() {
+        agendar(CLIENTE, "2026-10-20", "10:00");
+
+        assertThrows(ValidacionRecorridoException.class, () -> agendar(CLIENTE, "2026-10-22", "15:00"));
+    }
+
+    @Test
     void elClienteCancelaSuRecorrido() {
         Recorrido r = agendar(CLIENTE, "2026-10-20", "10:00");
 
