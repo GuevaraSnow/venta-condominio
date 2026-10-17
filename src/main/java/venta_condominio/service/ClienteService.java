@@ -32,7 +32,16 @@ public class ClienteService {
         this.verificacionEmailService = verificacionEmailService;
     }
 
-    public void registrarCliente(RegistroClienteRequest request) {
+    /**
+     * Valida todos los datos del registro SIN guardar nada.
+     * Se llama antes de enviar el código de verificación al correo,
+     * para que el usuario vea los errores de una vez.
+     */
+    public Cliente validarRegistro(RegistroClienteRequest request) {
+
+        if (request == null) {
+            throw new UsuarioException("Faltan los datos del registro");
+        }
 
         if (!request.isAceptoTratamientoDatos()) {
             throw new UsuarioException(
@@ -40,18 +49,25 @@ public class ClienteService {
             );
         }
 
-        String email = request.getEmail();
-
-        if (!verificacionEmailService.estaVerificado(email)) {
-            throw new UsuarioException(
-                    "El correo electrónico debe ser verificado antes de registrar el cliente"
-            );
+        if (request.getContrasena() == null || request.getContrasena().length() < 6) {
+            throw new UsuarioException("La contraseña debe tener al menos 6 caracteres");
         }
 
-        if (clienteRepositorio.buscarPorEmail(email) != null) {
+        String cedula = limpio(request.getCedula());
+        String telefono = limpio(request.getTelefono());
+        String email = limpio(request.getEmail());
+
+        if (cedula == null || !cedula.matches("\\d{6,10}")) {
+            throw new UsuarioException("La cédula debe tener entre 6 y 10 dígitos, solo números");
+        }
+
+        if (telefono == null || !telefono.matches("3\\d{9}")) {
             throw new UsuarioException(
-                    "Ya existe un cliente registrado con ese correo"
-            );
+                    "El teléfono debe ser un celular de 10 dígitos que empiece por 3, solo números");
+        }
+
+        if (email == null || !email.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")) {
+            throw new UsuarioException("El correo electrónico no es válido");
         }
 
         Municipio municipio = new Municipio(
@@ -59,19 +75,33 @@ public class ClienteService {
                 request.getDepartamento()
         );
 
-        Cliente cliente = new Cliente(
-                request.getNombre(),
-                request.getPrimerApellido(),
-                request.getSegundoApellido(),
-                request.getCedula(),
-                request.getEmail(),
-                request.getTelefono(),
-                request.getSalario(),
-                request.getPresupuesto(),
-                request.getTipoInmueble(),
-                request.getDepartamento(),
-                municipio
-        );
+        Cliente cliente = construirCliente(request, municipio);
+
+        if (clienteRepositorio.buscarPorEmail(cliente.getEmail()) != null
+                || usuarioService.existeUsuario(cliente.getEmail())) {
+            throw new UsuarioException(
+                    "Ya existe una cuenta registrada con ese correo"
+            );
+        }
+
+        if (clienteRepositorio.buscarPorCedula(cliente.getCedula()) != null) {
+            throw new UsuarioException(
+                    "Ya existe un cliente registrado con esa cédula"
+            );
+        }
+
+        return cliente;
+    }
+
+    public void registrarCliente(RegistroClienteRequest request) {
+
+        Cliente cliente = validarRegistro(request);
+
+        if (!verificacionEmailService.estaVerificado(cliente.getEmail())) {
+            throw new UsuarioException(
+                    "El correo electrónico debe ser verificado antes de registrar el cliente"
+            );
+        }
 
         String idUsuario = UUID.randomUUID().toString();
 
@@ -85,6 +115,27 @@ public class ClienteService {
         );
 
         clienteRepositorio.guardar(cliente);
+    }
+
+    private static String limpio(String valor) {
+        return valor == null ? null : valor.trim();
+    }
+
+    private Cliente construirCliente(RegistroClienteRequest request, Municipio municipio) {
+
+        return new Cliente(
+                limpio(request.getNombre()),
+                limpio(request.getPrimerApellido()),
+                limpio(request.getSegundoApellido()),
+                limpio(request.getCedula()),
+                limpio(request.getEmail()),
+                limpio(request.getTelefono()),
+                request.getSalario(),
+                request.getPresupuesto(),
+                request.getTipoInmueble(),
+                request.getDepartamento(),
+                municipio
+        );
     }
 
     /**

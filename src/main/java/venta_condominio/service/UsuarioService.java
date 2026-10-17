@@ -73,6 +73,10 @@ public class UsuarioService {
         usuarioRepositorio.guardar(usuario);
     }
 
+    public boolean existeUsuario(String email) {
+        return email != null && usuarioRepositorio.buscarPorEmail(email.trim()) != null;
+    }
+
     public Usuario iniciarSesion(String email, String contrasena) {
 
         if (email == null || email.isBlank() || contrasena == null || contrasena.isBlank()) {

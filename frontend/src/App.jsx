@@ -20,6 +20,19 @@ const ETIQUETAS_PESTANA = {
   perfil: "Mi perfil",
 };
 
+// Censura el correo: camilo.perez246@gmail.com -> c**********246@gmail.com
+function enmascararCorreo(correo) {
+  if (!correo || !correo.includes("@")) return correo || "";
+
+  const [usuario, dominio] = correo.trim().split("@");
+
+  if (usuario.length <= 4) {
+    return `${usuario[0]}${"*".repeat(Math.max(usuario.length - 1, 1))}@${dominio}`;
+  }
+
+  return `${usuario[0]}${"*".repeat(usuario.length - 4)}${usuario.slice(-3)}@${dominio}`;
+}
+
 function App() {
   const [vista, setVista] = useState("login");
   const [codigoVerificacion, setCodigoVerificacion] = useState("");
@@ -100,7 +113,13 @@ function App() {
   };
 
   const manejarCambio = (evento) => {
-    const { name, value } = evento.target;
+    const { name } = evento.target;
+    let { value } = evento.target;
+
+    // Cédula y teléfono: solo números
+    if (name === "cedula" || name === "telefono") {
+      value = value.replace(/\D/g, "");
+    }
 
     setFormulario((anterior) => ({
       ...anterior,
@@ -312,6 +331,36 @@ function App() {
     evento.preventDefault();
 
     try {
+      // 1. Validar TODOS los datos antes de enviar el código al correo
+      const respuestaValidacion = await fetch(`${API_URL}/clientes/validar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: formulario.nombre,
+          primerApellido: formulario.primerApellido,
+          segundoApellido: formulario.segundoApellido,
+          cedula: formulario.cedula,
+          email: formulario.email,
+          telefono: formulario.telefono,
+          contrasena: formulario.contrasena,
+          salario: Number(formulario.salario),
+          presupuesto: Number(formulario.presupuesto),
+          tipoInmueble: formulario.tipoInmueble,
+          departamento: formulario.departamento,
+          municipio: formulario.municipio,
+          aceptoTratamientoDatos: aceptoTratamientoDatos,
+        }),
+      });
+
+      if (!respuestaValidacion.ok) {
+        const datosValidacion = await respuestaValidacion.json().catch(() => ({}));
+        alert(datosValidacion.mensaje || "Revisa los datos del registro");
+        return;
+      }
+
+      // 2. Datos correctos: ahora sí se envía el código
       const respuesta = await fetch(
           `${API_URL}/verificacion-email/generar`,
           {
@@ -916,7 +965,7 @@ function App() {
                   <h2>Nueva contraseña</h2>
 
                   <p className="form-description">
-                    Si <strong>{recuperacion.email}</strong> está registrado, te
+                    Si <strong>{enmascararCorreo(recuperacion.email)}</strong> está registrado, te
                     llegó un código. Revisa también la carpeta de spam.
                   </p>
 
@@ -1046,6 +1095,9 @@ function App() {
                       <label>Cédula</label>
                       <input
                           name="cedula"
+                          inputMode="numeric"
+                          minLength="6"
+                          maxLength="10"
                           placeholder="Número de cédula"
                           value={formulario.cedula}
                           onChange={manejarCambio}
@@ -1057,6 +1109,9 @@ function App() {
                       <label>Teléfono</label>
                       <input
                           name="telefono"
+                          inputMode="numeric"
+                          pattern="3[0-9]{9}"
+                          title="Celular de 10 dígitos que empiece por 3"
                           placeholder="3001234567"
                           maxLength="10"
                           value={formulario.telefono}
@@ -1204,7 +1259,8 @@ function App() {
                   <h2>Verificar correo</h2>
 
                   <p className="form-description">
-                    Ingresa el código que recibiste en tu correo
+                    Ingresa el código que enviamos a{" "}
+                    <strong>{enmascararCorreo(formulario.email)}</strong>
                   </p>
 
                   <div className="input-group">
