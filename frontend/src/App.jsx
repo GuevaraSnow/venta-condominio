@@ -3,16 +3,18 @@ import "./App.css";
 import { API_URL, urlArchivo } from "./api";
 import Cotizaciones from "./Cotizaciones";
 import Reservas from "./Reservas";
+import Recorridos, { AgendarRecorrido } from "./Recorridos";
 
 const PESTANAS_POR_ROL = {
-  CLIENTE: ["unidades", "cotizaciones", "reservas", "perfil"],
-  ASESOR_COMERCIAL: ["unidades", "cotizaciones", "reservas", "perfil"],
-  DIRECTOR_COMERCIAL: ["unidades", "crear", "cotizaciones", "reservas", "perfil"],
+  CLIENTE: ["unidades", "recorridos", "cotizaciones", "reservas", "perfil"],
+  ASESOR_COMERCIAL: ["unidades", "recorridos", "cotizaciones", "reservas", "perfil"],
+  DIRECTOR_COMERCIAL: ["unidades", "crear", "recorridos", "cotizaciones", "reservas", "perfil"],
 };
 
 const ETIQUETAS_PESTANA = {
   unidades: "Unidades disponibles",
   crear: "Crear unidad",
+  recorridos: "Recorridos",
   cotizaciones: "Cotizaciones",
   reservas: "Reservas",
   perfil: "Mi perfil",
@@ -192,7 +194,7 @@ function App() {
       setVista("panel");
 
       if (pestanasDisponibles.includes("unidades")) {
-        await cargarUnidadesDisponibles();
+        await cargarUnidadesDisponibles(datos.email);
       }
     } catch (error) {
       console.error(error);
@@ -460,14 +462,23 @@ function App() {
   // F-02: CARGAR Y MOSTRAR UNIDADES DISPONIBLES
   // =========================================================
 
-  const cargarUnidadesDisponibles = async () => {
+  // R001: el backend solo entrega unidades a usuarios con sesión (y a clientes
+  // con registro completo), por eso se envía el correo del usuario.
+  const cargarUnidadesDisponibles = async (email = usuarioActual?.email) => {
     setCargandoUnidades(true);
     setErrorUnidades("");
 
     try {
       const respuesta = await fetch(
-          `${API_URL}/unidades/disponibles`,
+          `${API_URL}/unidades/disponibles?email=${encodeURIComponent(email || "")}`,
       );
+
+      if (respuesta.status === 403) {
+        const datos = await respuesta.json();
+        setUnidades([]);
+        setErrorUnidades(datos.mensaje || "No tienes acceso a las unidades.");
+        return;
+      }
 
       if (!respuesta.ok) {
         throw new Error("El servidor respondió con estado " + respuesta.status);
@@ -1257,7 +1268,7 @@ function App() {
                             }}
                         >
                           {usuarioActual.rol === "CLIENTE" &&
-                          (pestana === "cotizaciones" || pestana === "reservas")
+                          ["recorridos", "cotizaciones", "reservas"].includes(pestana)
                               ? "Mis " + pestana
                               : ETIQUETAS_PESTANA[pestana]}
                         </button>
@@ -1569,6 +1580,16 @@ function App() {
                       />
                   )}
 
+                  {/* ---- Pestaña: Recorridos (F-02) ---- */}
+
+                  {pestanaActiva === "recorridos" && (
+                      <Recorridos
+                          usuario={usuarioActual}
+                          unidades={unidades}
+                          onCambioUnidades={cargarUnidadesDisponibles}
+                      />
+                  )}
+
                   {/* ---- Pestaña: Reservas (F-04) ---- */}
 
                   {pestanaActiva === "reservas" && (
@@ -1729,6 +1750,11 @@ function App() {
                       <p>{unidadSeleccionada.municipio?.nombre}</p>
                     </div>
                   </div>
+
+                  {/* F-02: el cliente agenda su visita a la unidad */}
+                  {usuarioActual?.rol === "CLIENTE" && (
+                      <AgendarRecorrido usuario={usuarioActual} unidad={unidadSeleccionada} />
+                  )}
                 </div>
             )}
           </div>

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import venta_condominio.exception.ValidacionUnidadException;
 import venta_condominio.model.FotoPerfilRequest;
 import venta_condominio.model.Unidad;
+import venta_condominio.service.AccesoService;
 import venta_condominio.service.UnidadService;
 
 @RestController
@@ -16,9 +17,11 @@ import venta_condominio.service.UnidadService;
 public class UnidadController {
 
     private final UnidadService unidadService;
+    private final AccesoService accesoService;
 
-    public UnidadController(UnidadService unidadService) {
+    public UnidadController(UnidadService unidadService, AccesoService accesoService) {
         this.unidadService = unidadService;
+        this.accesoService = accesoService;
     }
 
     @GetMapping
@@ -26,8 +29,10 @@ public class UnidadController {
         return ResponseEntity.ok(unidadService.listarTodas());
     }
 
+    /** R001: solo usuarios con sesión (y clientes con registro completo) ven las unidades. */
     @GetMapping("/disponibles")
-    public ResponseEntity<List<Unidad>> listarDisponibles() {
+    public ResponseEntity<List<Unidad>> listarDisponibles(@RequestParam(required = false) String email) {
+        accesoService.exigirPuedeVerUnidades(email);
         return ResponseEntity.ok(unidadService.listarDisponibles());
     }
 

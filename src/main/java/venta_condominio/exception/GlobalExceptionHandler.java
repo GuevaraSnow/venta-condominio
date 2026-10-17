@@ -54,4 +54,23 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("mensaje", exception.getMessage()));
     }
+
+    @ExceptionHandler(ValidacionRecorridoException.class)
+    public ResponseEntity<Map<String, String>> manejarValidacionRecorridoException(
+            ValidacionRecorridoException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("mensaje", exception.getMessage()));
+    }
+
+    /** R001: sin sesión o sin registro completo no se ven unidades. */
+    @ExceptionHandler(AccesoDenegadoException.class)
+    public ResponseEntity<Map<String, String>> manejarAccesoDenegadoException(
+            AccesoDenegadoException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(Map.of("mensaje", exception.getMessage()));
+    }
 }
