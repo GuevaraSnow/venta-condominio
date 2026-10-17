@@ -45,4 +45,13 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("mensaje", exception.getMessage()));
     }
+
+    @ExceptionHandler(ValidacionReservaException.class)
+    public ResponseEntity<Map<String, String>> manejarValidacionReservaException(
+            ValidacionReservaException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("mensaje", exception.getMessage()));
+    }
 }

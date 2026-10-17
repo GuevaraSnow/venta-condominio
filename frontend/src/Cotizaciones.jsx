@@ -15,6 +15,10 @@ const CUOTA_INICIAL = 30;
 const DESCUENTO_SIN_AUTORIZACION = 2;
 const DESCUENTO_MAXIMO = 10;
 
+// R002: cuota de reserva = 1 % del precio de lista, mínimo $5.000.000
+const cuotaReserva = (precioLista) =>
+  Math.max(Math.round((Number(precioLista) || 0) / 100), 5000000);
+
 const ESTADOS = {
   GENERADA: { texto: "Lista para firmar", clase: "generada" },
   PENDIENTE_AUTORIZACION: { texto: "Pendiente de autorización", clase: "pendiente" },
@@ -117,12 +121,13 @@ function TarjetaCotizacion({ cotizacion, mostrarCliente, acciones }) {
   );
 }
 
-export default function Cotizaciones({ usuario, unidades }) {
+export default function Cotizaciones({ usuario, unidades, onCambioUnidades }) {
   const esCliente = usuario.rol === "CLIENTE";
   const esDirector = usuario.rol === "DIRECTOR_COMERCIAL";
 
   const [cotizaciones, setCotizaciones] = useState([]);
   const [clientes, setClientes] = useState([]);
+  const [reservas, setReservas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [mensaje, setMensaje] = useState(null);
   const [enviando, setEnviando] = useState(false);
@@ -145,14 +150,20 @@ export default function Cotizaciones({ usuario, unidades }) {
           ? `/cotizaciones?cliente=${encodeURIComponent(usuario.email)}`
           : "/cotizaciones";
 
-        const [lista, listaClientes] = await Promise.all([
+        const rutaReservas = esCliente
+          ? `/reservas?cliente=${encodeURIComponent(usuario.email)}`
+          : "/reservas";
+
+        const [lista, listaClientes, listaReservas] = await Promise.all([
           pedir(ruta),
           esCliente ? Promise.resolve([]) : pedir("/clientes"),
+          pedir(rutaReservas),
         ]);
 
         if (activo) {
           setCotizaciones(lista);
           setClientes(listaClientes);
+          setReservas(listaReservas);
         }
       } catch (error) {
         if (activo) setMensaje({ tipo: "error", texto: error.message });
@@ -224,6 +235,66 @@ export default function Cotizaciones({ usuario, unidades }) {
     } catch (error) {
       setMensaje({ tipo: "error", texto: error.message });
     }
+  };
+
+  // F-04: reservar la unidad a partir de la cotización firmada (R004)
+  const reservar = async (cotizacion) => {
+    const cuota = cuotaReserva(cotizacion.precioLista);
+
+    if (!window.confirm(`¿Reservar ${cotizacion.identificadorUnidad}? La cuota de reserva es ${pesos(cuota)}.`)) {
+      return;
+    }
+
+    setMensaje(null);
+
+    try {
+      const reserva = await pedir("/reservas", {
+        method: "POST",
+        body: JSON.stringify({ idCotizacion: cotizacion.id, email: usuario.email }),
+      });
+
+      setMensaje({
+        tipo: "ok",
+        texto: `Unidad reservada. Cuota de reserva: ${pesos(reserva.cuotaReserva)}. La encuentras en la pestaña de reservas.`,
+      });
+      setVersion((v) => v + 1);
+      if (onCambioUnidades) onCambioUnidades();
+    } catch (error) {
+      setMensaje({ tipo: "error", texto: error.message });
+    }
+  };
+
+  const tieneReservaActiva = (cotizacion) =>
+    reservas.some((r) => r.idCotizacion === cotizacion.id && r.estado !== "CANCELADA");
+
+  const accionesDe = (cotizacion) => {
+    if (esCliente && cotizacion.estado === "GENERADA") {
+      return (
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() =>
+            ejecutar(cotizacion.id, "firmar", "Cotización firmada. Ya puedes reservar la unidad.")
+          }
+        >
+          Firmar cotización
+        </button>
+      );
+    }
+
+    if (cotizacion.estado === "FIRMADA") {
+      if (tieneReservaActiva(cotizacion)) {
+        return <span className="cot-reservada">Unidad reservada</span>;
+      }
+
+      return (
+        <button type="button" className="primary-button" onClick={() => reservar(cotizacion)}>
+          Reservar unidad · cuota {pesos(cuotaReserva(cotizacion.precioLista))}
+        </button>
+      );
+    }
+
+    return null;
   };
 
   const pendientes = cotizaciones.filter((c) => c.estado === "PENDIENTE_AUTORIZACION");
@@ -366,23 +437,7 @@ export default function Cotizaciones({ usuario, unidades }) {
               key={cotizacion.id}
               cotizacion={cotizacion}
               mostrarCliente={!esCliente}
-              acciones={
-                esCliente && cotizacion.estado === "GENERADA" ? (
-                  <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() =>
-                      ejecutar(
-                        cotizacion.id,
-                        "firmar",
-                        "Cotización firmada. Ya puedes continuar con la reserva de la unidad."
-                      )
-                    }
-                  >
-                    Firmar cotización
-                  </button>
-                ) : null
-              }
+              acciones={accionesDe(cotizacion)}
             />
           ))}
         </div>

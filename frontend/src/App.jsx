@@ -2,17 +2,19 @@ import { useState } from "react";
 import "./App.css";
 import { API_URL, urlArchivo } from "./api";
 import Cotizaciones from "./Cotizaciones";
+import Reservas from "./Reservas";
 
 const PESTANAS_POR_ROL = {
-  CLIENTE: ["unidades", "cotizaciones", "perfil"],
-  ASESOR_COMERCIAL: ["unidades", "cotizaciones", "perfil"],
-  DIRECTOR_COMERCIAL: ["unidades", "crear", "cotizaciones", "perfil"],
+  CLIENTE: ["unidades", "cotizaciones", "reservas", "perfil"],
+  ASESOR_COMERCIAL: ["unidades", "cotizaciones", "reservas", "perfil"],
+  DIRECTOR_COMERCIAL: ["unidades", "crear", "cotizaciones", "reservas", "perfil"],
 };
 
 const ETIQUETAS_PESTANA = {
   unidades: "Unidades disponibles",
   crear: "Crear unidad",
   cotizaciones: "Cotizaciones",
+  reservas: "Reservas",
   perfil: "Mi perfil",
 };
 
@@ -1249,8 +1251,9 @@ function App() {
                               setPestanaActiva(pestana);
                             }}
                         >
-                          {pestana === "cotizaciones" && usuarioActual.rol === "CLIENTE"
-                              ? "Mis cotizaciones"
+                          {usuarioActual.rol === "CLIENTE" &&
+                          (pestana === "cotizaciones" || pestana === "reservas")
+                              ? "Mis " + pestana
                               : ETIQUETAS_PESTANA[pestana]}
                         </button>
                     ))}
@@ -1554,7 +1557,20 @@ function App() {
                   {/* ---- Pestaña: Cotizaciones (F-03) ---- */}
 
                   {pestanaActiva === "cotizaciones" && (
-                      <Cotizaciones usuario={usuarioActual} unidades={unidades} />
+                      <Cotizaciones
+                          usuario={usuarioActual}
+                          unidades={unidades}
+                          onCambioUnidades={cargarUnidadesDisponibles}
+                      />
+                  )}
+
+                  {/* ---- Pestaña: Reservas (F-04) ---- */}
+
+                  {pestanaActiva === "reservas" && (
+                      <Reservas
+                          usuario={usuarioActual}
+                          onCambioUnidades={cargarUnidadesDisponibles}
+                      />
                   )}
 
                   {pestanaActiva === "perfil" && (
