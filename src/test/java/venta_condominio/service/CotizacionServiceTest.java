@@ -16,6 +16,8 @@ import venta_condominio.repository.ClienteRepositorio;
 import venta_condominio.repository.CotizacionRepositorio;
 import venta_condominio.repository.UnidadRepositorio;
 import venta_condominio.repository.UsuarioRepositorio;
+import venta_condominio.patrones.CotizacionFactory;
+import venta_condominio.patrones.EventoVenta;
 
 /** KAN-103: cálculos de la cotización y regla R003. */
 class CotizacionServiceTest {
@@ -64,7 +66,7 @@ class CotizacionServiceTest {
 
     @Test
     void calculaPrecioFinalCuotaInicialYSaldo() {
-        CotizacionService.Calculo c = CotizacionService.calcular(new BigDecimal("285000000"), new BigDecimal("2"));
+        CotizacionFactory.Calculo c = CotizacionFactory.calcular(new BigDecimal("285000000"), new BigDecimal("2"));
 
         assertEquals(new BigDecimal("5700000"), c.valorDescuento());
         assertEquals(new BigDecimal("279300000"), c.precioFinal());
@@ -142,6 +144,28 @@ class CotizacionServiceTest {
         assertEquals(EstadoCotizacion.VENCIDA, service.listarPorCliente(CLIENTE).get(0).getEstado());
         assertThrows(ValidacionCotizacionException.class,
                 () -> service.firmar(cotizacion.getId(), new AccionCotizacionRequest(CLIENTE, null)));
+    }
+
+    @Test
+    void patronObserverNotificaAlClienteYAlAsesor() {
+        List<EventoVenta> recibidos = new ArrayList<>();
+        service.suscribir(recibidos::add);
+
+        Cotizacion cotizacion = crear("1");
+        service.firmar(cotizacion.getId(), new AccionCotizacionRequest(CLIENTE, null));
+
+        assertEquals(2, recibidos.size());
+        assertEquals("COTIZACION_GENERADA", recibidos.get(0).tipo());
+        assertEquals(CLIENTE, recibidos.get(0).destinatario());
+        assertEquals("COTIZACION_FIRMADA", recibidos.get(1).tipo());
+        assertEquals(ASESOR, recibidos.get(1).destinatario());
+    }
+
+    @Test
+    void unObservadorQueFallaNoTumbaLaOperacion() {
+        service.suscribir(evento -> { throw new RuntimeException("correo caído"); });
+
+        assertEquals(EstadoCotizacion.GENERADA, crear("0").getEstado());
     }
 
     // ------------------------------------------------ repositorios en memoria

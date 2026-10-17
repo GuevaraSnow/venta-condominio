@@ -1,11 +1,9 @@
 package venta_condominio.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
@@ -24,6 +22,9 @@ import venta_condominio.repository.CotizacionRepositorio;
 import venta_condominio.repository.ReservaRepositorio;
 import venta_condominio.repository.UnidadRepositorio;
 import venta_condominio.repository.UsuarioRepositorio;
+import venta_condominio.patrones.EventoVenta;
+import venta_condominio.patrones.PublicadorEventos;
+import venta_condominio.patrones.ReservaFactory;
 
 /**
  * F-04 Reservar unidad y calcular cuota de reserva.
@@ -33,10 +34,9 @@ import venta_condominio.repository.UsuarioRepositorio;
  *  - F-12: la unidad debe estar DISPONIBLE; al reservar pasa a RESERVADA
  */
 @Service
-public class ReservaService {
+public class ReservaService extends PublicadorEventos {
 
-    public static final BigDecimal PORCENTAJE_CUOTA_RESERVA = new BigDecimal("1");
-    public static final BigDecimal CUOTA_MINIMA = new BigDecimal("5000000");
+    private final ReservaFactory fabrica = new ReservaFactory();
 
     private final ReservaRepositorio reservaRepositorio;
     private final CotizacionRepositorio cotizacionRepositorio;
@@ -59,16 +59,10 @@ public class ReservaService {
         this.hoy = hoy;
     }
 
-    // =====================================================
-    // R002: cálculo de la cuota de reserva
-    // =====================================================
+    // R002: cálculo de la cuota de reserva → ver ReservaFactory.calcularCuota
 
     public static BigDecimal calcularCuota(BigDecimal precioLista) {
-
-        BigDecimal unoPorCiento = precioLista.multiply(PORCENTAJE_CUOTA_RESERVA)
-                .divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP);
-
-        return unoPorCiento.max(CUOTA_MINIMA);
+        return ReservaFactory.calcularCuota(precioLista);
     }
 
     // =====================================================
@@ -121,23 +115,18 @@ public class ReservaService {
                     + " no está disponible (" + unidad.getEstado() + ")");
         }
 
-        Reserva reserva = new Reserva(
-                UUID.randomUUID().toString(),
-                cotizacion.getId(),
-                unidad.getIdentificador(),
-                cotizacion.getEmailCliente(),
-                cotizacion.getNombreCliente(),
-                quien.getEmail(),
-                unidad.getPrecioLista(),
-                cotizacion.getPrecioFinal(),
-                calcularCuota(unidad.getPrecioLista()),
-                hoy.get().toString(),
-                EstadoReserva.PENDIENTE_PAGO,
-                null
-        );
+        // Patrón Factory: la fábrica arma la reserva y calcula la cuota (R002)
+        Reserva reserva = fabrica.crear(cotizacion, unidad, quien.getEmail(), hoy.get());
 
         reservaRepositorio.guardar(reserva);
         unidadRepositorio.actualizar(unidad.conEstado(EstadoUnidad.RESERVADA));
+
+        // Patrón Observer
+        notificar(new EventoVenta("UNIDAD_RESERVADA", reserva.getEmailCliente(),
+                "Reserva confirmada: " + reserva.getIdentificadorUnidad(),
+                "Hola " + reserva.getNombreCliente() + ", reservaste " + reserva.getIdentificadorUnidad()
+                        + ". Cuota de reserva: " + CotizacionService.pesos(reserva.getCuotaReserva())
+                        + ". La unidad queda bloqueada a tu nombre mientras se valida el pago."));
 
         return reserva;
     }
@@ -190,6 +179,10 @@ public class ReservaService {
         if (unidad != null && unidad.getEstado() == EstadoUnidad.RESERVADA) {
             unidadRepositorio.actualizar(unidad.conEstado(EstadoUnidad.DISPONIBLE));
         }
+
+        notificar(new EventoVenta("RESERVA_CANCELADA", cancelada.getEmailCliente(),
+                "Reserva cancelada: " + cancelada.getIdentificadorUnidad(),
+                "Tu reserva de " + cancelada.getIdentificadorUnidad() + " fue cancelada por el equipo comercial."));
 
         return cancelada;
     }

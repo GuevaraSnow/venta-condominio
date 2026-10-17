@@ -1,12 +1,10 @@
 package venta_condominio.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
@@ -25,24 +23,25 @@ import venta_condominio.repository.ClienteRepositorio;
 import venta_condominio.repository.CotizacionRepositorio;
 import venta_condominio.repository.UnidadRepositorio;
 import venta_condominio.repository.UsuarioRepositorio;
+import venta_condominio.patrones.CotizacionFactory;
+import venta_condominio.patrones.EventoVenta;
+import venta_condominio.patrones.PublicadorEventos;
 
 /**
  * F-03 Generar cotización.
  *
  * Condiciones acordadas con el negocio:
- *  - cuota inicial = 30 % del precio final; el resto es el saldo a financiar
- *  - la cotización es válida 15 días
  *  - descuento máximo 10 %; si supera el 2 % la autoriza el director comercial (R003)
+ *  - la fabricación de la cotización (cálculos, vigencia, estado inicial) la hace
+ *    CotizacionFactory (patrón Factory)
+ *  - cada cambio importante se notifica a los observadores (patrón Observer)
  */
 @Service
-public class CotizacionService {
+public class CotizacionService extends PublicadorEventos {
 
-    public static final BigDecimal PORCENTAJE_CUOTA_INICIAL = new BigDecimal("30");
-    public static final BigDecimal DESCUENTO_SIN_AUTORIZACION = new BigDecimal("2");
     public static final BigDecimal DESCUENTO_MAXIMO = new BigDecimal("10");
-    public static final int DIAS_VIGENCIA = 15;
 
-    private static final BigDecimal CIEN = new BigDecimal("100");
+    private final CotizacionFactory fabrica = new CotizacionFactory();
 
     private final CotizacionRepositorio cotizacionRepositorio;
     private final UnidadRepositorio unidadRepositorio;
@@ -106,65 +105,30 @@ public class CotizacionService {
                     + DESCUENTO_MAXIMO.toPlainString() + " %");
         }
 
-        Calculo calculo = calcular(unidad.getPrecioLista(), descuento);
-
-        // R003: descuentos mayores al 2 % esperan la autorización del director
-        EstadoCotizacion estado = requiereAutorizacion(descuento)
-                ? EstadoCotizacion.PENDIENTE_AUTORIZACION
-                : EstadoCotizacion.GENERADA;
-
-        LocalDate fecha = hoy.get();
-
-        Cotizacion cotizacion = new Cotizacion(
-                UUID.randomUUID().toString(),
-                unidad.getIdentificador(),
-                cliente.getEmail(),
-                nombreCompleto(cliente),
-                asesor.getEmail(),
-                unidad.getPrecioLista(),
-                descuento,
-                calculo.valorDescuento(),
-                calculo.precioFinal(),
-                calculo.cuotaInicial(),
-                calculo.saldoFinanciar(),
-                fecha.toString(),
-                fecha.plusDays(DIAS_VIGENCIA).toString(),
-                estado,
-                null,
-                null
-        );
+        // Patrón Factory: la fábrica aplica cálculos, vigencia y estado inicial (R003)
+        Cotizacion cotizacion = fabrica.crear(unidad, cliente, asesor, descuento, hoy.get());
 
         cotizacionRepositorio.guardar(cotizacion);
+
+        // Patrón Observer
+        if (cotizacion.getEstado() == EstadoCotizacion.GENERADA) {
+            notificar(new EventoVenta("COTIZACION_GENERADA", cotizacion.getEmailCliente(),
+                    "Tienes una nueva cotización",
+                    "Hola " + cotizacion.getNombreCliente() + ", tu asesor generó la cotización de "
+                            + cotizacion.getIdentificadorUnidad() + " por " + pesos(cotizacion.getPrecioFinal())
+                            + ". Ingresa a Venta Condominio para firmarla antes del "
+                            + cotizacion.getFechaVencimiento() + "."));
+        } else {
+            notificar(new EventoVenta("DESCUENTO_POR_AUTORIZAR", null,
+                    "Descuento por autorizar",
+                    "La cotización de " + cotizacion.getIdentificadorUnidad() + " tiene un descuento de "
+                            + cotizacion.getPorcentajeDescuento() + " % que requiere autorización (R003)."));
+        }
 
         return cotizacion;
     }
 
-    // =====================================================
-    // Cálculos (KAN-96) y regla R003 (KAN-97)
-    // =====================================================
-
-    public record Calculo(BigDecimal valorDescuento, BigDecimal precioFinal,
-                          BigDecimal cuotaInicial, BigDecimal saldoFinanciar) {
-    }
-
-    public static Calculo calcular(BigDecimal precioLista, BigDecimal porcentajeDescuento) {
-
-        BigDecimal valorDescuento = precioLista.multiply(porcentajeDescuento)
-                .divide(CIEN, 0, RoundingMode.HALF_UP);
-
-        BigDecimal precioFinal = precioLista.subtract(valorDescuento);
-
-        BigDecimal cuotaInicial = precioFinal.multiply(PORCENTAJE_CUOTA_INICIAL)
-                .divide(CIEN, 0, RoundingMode.HALF_UP);
-
-        BigDecimal saldoFinanciar = precioFinal.subtract(cuotaInicial);
-
-        return new Calculo(valorDescuento, precioFinal, cuotaInicial, saldoFinanciar);
-    }
-
-    public static boolean requiereAutorizacion(BigDecimal porcentajeDescuento) {
-        return porcentajeDescuento.compareTo(DESCUENTO_SIN_AUTORIZACION) > 0;
-    }
+    // Cálculos (KAN-96) y regla R003 (KAN-97): ver CotizacionFactory
 
     // =====================================================
     // Consultar (marca las vencidas, KAN-99)
@@ -248,6 +212,16 @@ public class CotizacionService {
 
         cotizacionRepositorio.actualizar(actualizada);
 
+        boolean autorizada = nuevoEstado == EstadoCotizacion.GENERADA;
+        notificar(new EventoVenta(autorizada ? "DESCUENTO_AUTORIZADO" : "DESCUENTO_RECHAZADO",
+                actualizada.getEmailCliente(),
+                autorizada ? "Tu descuento fue autorizado" : "Tu descuento no fue aprobado",
+                autorizada
+                        ? "El director comercial autorizó el descuento de tu cotización de "
+                          + actualizada.getIdentificadorUnidad() + ". Ya puedes firmarla en Venta Condominio."
+                        : "El director comercial no aprobó el descuento de tu cotización de "
+                          + actualizada.getIdentificadorUnidad() + ". Tu asesor te contactará."));
+
         return actualizada;
     }
 
@@ -283,6 +257,11 @@ public class CotizacionService {
         Cotizacion firmada = cotizacion.conEstado(EstadoCotizacion.FIRMADA, null, null);
         cotizacionRepositorio.actualizar(firmada);
 
+        notificar(new EventoVenta("COTIZACION_FIRMADA", firmada.getEmailAsesor(),
+                "Cotización firmada",
+                firmada.getNombreCliente() + " firmó la cotización de " + firmada.getIdentificadorUnidad()
+                        + ". Ya puede reservar la unidad."));
+
         return firmada;
     }
 
@@ -308,6 +287,10 @@ public class CotizacionService {
     private static String nombreCompleto(Cliente cliente) {
         return (cliente.getNombre() + " " + cliente.getPrimerApellido() + " "
                 + (cliente.getSegundoApellido() == null ? "" : cliente.getSegundoApellido())).trim();
+    }
+
+    static String pesos(BigDecimal valor) {
+        return "$" + java.text.NumberFormat.getIntegerInstance(java.util.Locale.of("es", "CO")).format(valor);
     }
 
     private static String texto(String valor) {

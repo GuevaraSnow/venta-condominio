@@ -23,6 +23,8 @@ import venta_condominio.repository.ClienteRepositorio;
 import venta_condominio.repository.RecorridoRepositorio;
 import venta_condominio.repository.UnidadRepositorio;
 import venta_condominio.repository.UsuarioRepositorio;
+import venta_condominio.patrones.EventoVenta;
+import venta_condominio.patrones.PublicadorEventos;
 
 /**
  * F-02 Recorrer el conjunto: agendar, iniciar, finalizar y cancelar visitas.
@@ -32,7 +34,7 @@ import venta_condominio.repository.UsuarioRepositorio;
  *  - Al iniciar, la unidad pasa a EN_RECORRIDO; al finalizar vuelve a DISPONIBLE (F-12)
  */
 @Service
-public class RecorridoService {
+public class RecorridoService extends PublicadorEventos {
 
     public static final LocalTime HORA_INICIO = LocalTime.of(8, 0);
     public static final LocalTime HORA_FIN = LocalTime.of(17, 0);
@@ -135,6 +137,12 @@ public class RecorridoService {
         );
 
         recorridoRepositorio.guardar(recorrido);
+
+        // Patrón Observer
+        notificar(new EventoVenta("RECORRIDO_AGENDADO", recorrido.getEmailCliente(),
+                "Recorrido agendado: " + recorrido.getIdentificadorUnidad(),
+                "Tu visita a " + recorrido.getIdentificadorUnidad() + " quedó agendada para el "
+                        + recorrido.getFecha() + " a las " + recorrido.getHora() + "."));
 
         return recorrido;
     }
