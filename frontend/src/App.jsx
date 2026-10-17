@@ -6,9 +6,7 @@ import Cotizaciones from "./Cotizaciones";
 const PESTANAS_POR_ROL = {
   CLIENTE: ["unidades", "cotizaciones", "perfil"],
   ASESOR_COMERCIAL: ["unidades", "cotizaciones", "perfil"],
-  ABOGADO: ["unidades", "perfil"],
   DIRECTOR_COMERCIAL: ["unidades", "crear", "cotizaciones", "perfil"],
-  ADMINISTRADOR_CONJUNTO: ["unidades", "crear", "perfil"],
 };
 
 const ETIQUETAS_PESTANA = {
@@ -498,7 +496,7 @@ function App() {
   };
 
   // =========================================================
-  // CREAR UNIDAD (Administrador / Director comercial)
+  // CREAR UNIDAD (solo Director comercial)
   // =========================================================
 
   const formUnidadVacio = {
@@ -622,7 +620,7 @@ function App() {
   ].sort((a, b) => a.localeCompare(b, "es"));
 
   // =========================================================
-  // FOTOS DE UNIDAD (VC-38, solo Director comercial / Administrador)
+  // FOTOS DE UNIDAD (VC-38, solo Director comercial)
   // =========================================================
 
   const [subiendoFotoUnidad, setSubiendoFotoUnidad] = useState(false);
@@ -1391,7 +1389,7 @@ function App() {
                       </div>
                   )}
 
-                  {/* ---- Pestaña: Crear unidad (Administrador / Director comercial) ---- */}
+                  {/* ---- Pestaña: Crear unidad (solo Director comercial) ---- */}
 
                   {pestanaActiva === "crear" && (
                       <form className="auth-form" onSubmit={crearUnidad}>
@@ -1650,8 +1648,7 @@ function App() {
                       </p>
                   )}
 
-                  {(usuarioActual?.rol === "DIRECTOR_COMERCIAL" ||
-                      usuarioActual?.rol === "ADMINISTRADOR_CONJUNTO") && (
+                  {usuarioActual?.rol === "DIRECTOR_COMERCIAL" && (
                       <button
                           type="button"
                           className="primary-button"
@@ -1661,8 +1658,7 @@ function App() {
                       </button>
                   )}
 
-                  {(usuarioActual?.rol === "DIRECTOR_COMERCIAL" ||
-                      usuarioActual?.rol === "ADMINISTRADOR_CONJUNTO") && (
+                  {usuarioActual?.rol === "DIRECTOR_COMERCIAL" && (
                       <label className="secondary-button profile-upload-label">
                         {subiendoFotoUnidad ? "Subiendo..." : "Agregar foto"}
                         <input
