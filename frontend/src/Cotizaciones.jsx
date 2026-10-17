@@ -368,7 +368,7 @@ export default function Cotizaciones({ usuario, unidades, onCambioUnidades }) {
           {requiereAutorizacion && (
             <p className="cot-aviso">
               Un descuento mayor al {DESCUENTO_SIN_AUTORIZACION} % requiere autorización del director
-              comercial (R003).
+              comercial.
             </p>
           )}
 

@@ -34,7 +34,7 @@ public class AccesoService {
         }
 
         if (usuario.getRol() == Rol.CLIENTE && clienteRepositorio.buscarPorEmail(usuario.getEmail()) == null) {
-            throw new AccesoDenegadoException("Completa tu registro de cliente para ver las unidades (R001)");
+            throw new AccesoDenegadoException("Completa tu registro de cliente para ver las unidades");
         }
 
         return usuario;

@@ -121,8 +121,8 @@ export default function Reservas({ usuario, onCambioUnidades }) {
         <h3>{esCliente ? "Mis reservas" : "Reservas"}</h3>
 
         <p className="cot-fechas">
-          La cuota de reserva es el 1 % del precio de lista, con un mínimo de $ 5.000.000 (R002).
-          Para reservar, firma primero la cotización (R004).
+          La cuota de reserva es el 1 % del precio de lista, con un mínimo de $ 5.000.000.
+          Para reservar, firma primero la cotización.
         </p>
 
         {cargando && <p>Cargando reservas...</p>}

@@ -122,7 +122,7 @@ public class CotizacionService extends PublicadorEventos {
             notificar(new EventoVenta("DESCUENTO_POR_AUTORIZAR", null,
                     "Descuento por autorizar",
                     "La cotización de " + cotizacion.getIdentificadorUnidad() + " tiene un descuento de "
-                            + cotizacion.getPorcentajeDescuento() + " % que requiere autorización (R003)."));
+                            + cotizacion.getPorcentajeDescuento() + " % que requiere autorización."));
         }
 
         return cotizacion;
