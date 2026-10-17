@@ -577,6 +577,11 @@ function App() {
                 ? "No se pudo actualizar la unidad"
                 : "No se pudo crear la unidad")
         );
+
+        // F-12: si la unidad dejó de estar disponible, se refresca el listado
+        if (unidadEditando) {
+          await cargarUnidadesDisponibles();
+        }
         return;
       }
 

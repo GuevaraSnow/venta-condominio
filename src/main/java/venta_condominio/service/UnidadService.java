@@ -43,6 +43,8 @@ public class UnidadService {
             throw new ValidacionUnidadException("No se encontró la unidad " + identificador);
         }
 
+        exigirDisponible(unidad);
+
         if (fotoBase64 == null || fotoBase64.isBlank()) {
             throw new ValidacionUnidadException("La foto es obligatoria");
         }
@@ -57,6 +59,12 @@ public class UnidadService {
     }
 
     public void eliminarUnidad(String identificador) {
+
+        Unidad unidad = unidadRepositorio.buscarPorIdentificador(identificador);
+
+        if (unidad != null) {
+            exigirDisponible(unidad);
+        }
 
         boolean eliminada = unidadRepositorio.eliminar(identificador);
 
@@ -77,6 +85,8 @@ public class UnidadService {
             throw new ValidacionUnidadException("No se encontró la unidad " + identificadorOriginal);
         }
 
+        exigirDisponible(existente);
+
         boolean cambiaIdentificador =
                 !identificadorOriginal.equalsIgnoreCase(datos.getIdentificador());
 
@@ -96,7 +106,7 @@ public class UnidadService {
                 datos.getDescripcion(),
                 datos.getDepartamento(),
                 datos.getMunicipio(),
-                datos.getEstado(),
+                existente.getEstado(),   // el estado no se cambia al editar
                 datos.getFotos().isEmpty() ? existente.getFotos() : datos.getFotos()
         );
 
@@ -104,5 +114,17 @@ public class UnidadService {
         unidadRepositorio.guardar(actualizada);
 
         return actualizada;
+    }
+
+    /**
+     * F-12: una unidad que no está DISPONIBLE (en recorrido, reservada o vendida)
+     * no se puede modificar ni eliminar.
+     */
+    private void exigirDisponible(Unidad unidad) {
+
+        if (unidad.getEstado() != EstadoUnidad.DISPONIBLE) {
+            throw new ValidacionUnidadException("La unidad " + unidad.getIdentificador()
+                    + " no está disponible (" + unidad.getEstado() + ")");
+        }
     }
 }
