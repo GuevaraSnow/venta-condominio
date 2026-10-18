@@ -284,6 +284,11 @@ export default function Recorridos({ usuario, unidades, onCambioUnidades }) {
     }
   };
 
+  // Los cancelados no se le muestran al cliente; al equipo solo los de hoy en adelante
+  const visibles = recorridos.filter(
+    (r) => r.estado !== "CANCELADO" || (!esCliente && r.fecha >= hoyIso()),
+  );
+
   return (
     <div className="cot-view">
       <Mensaje mensaje={mensaje} />
@@ -341,7 +346,7 @@ export default function Recorridos({ usuario, unidades, onCambioUnidades }) {
 
         {cargando && <p>Cargando recorridos...</p>}
 
-        {!cargando && recorridos.length === 0 && (
+        {!cargando && visibles.length === 0 && (
           <p className="cot-vacio">
             {esCliente
               ? "Aún no tienes recorridos. Agéndalo desde la ficha de una unidad."
@@ -350,7 +355,7 @@ export default function Recorridos({ usuario, unidades, onCambioUnidades }) {
         )}
 
         <div className="cot-grid">
-          {recorridos.map((r) => {
+          {visibles.map((r) => {
             const estado = ESTADOS[r.estado] || { texto: r.estado, clase: "" };
 
             return (
@@ -365,7 +370,7 @@ export default function Recorridos({ usuario, unidades, onCambioUnidades }) {
 
                 <p className="cot-fechas">
                   {fecha(r.fecha)} · {r.hora}
-                  {r.atendidoPor ? ` · atendido por ${r.atendidoPor}` : ""}
+                  {!esCliente && r.atendidoPor ? ` · atendido por ${r.atendidoPor}` : ""}
                 </p>
 
                 <div className="cot-acciones">

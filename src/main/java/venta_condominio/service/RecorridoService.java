@@ -266,7 +266,8 @@ public class RecorridoService extends PublicadorEventos {
             throw new ValidacionRecorridoException("Solo se cancela un recorrido agendado");
         }
 
-        Recorrido cancelado = recorrido.conEstado(EstadoRecorrido.CANCELADO, quien.getEmail());
+        // Cancelar no es "atender": no se guarda quién canceló como atendidoPor
+        Recorrido cancelado = recorrido.conEstado(EstadoRecorrido.CANCELADO, null);
         recorridoRepositorio.actualizar(cancelado);
 
         return cancelado;
