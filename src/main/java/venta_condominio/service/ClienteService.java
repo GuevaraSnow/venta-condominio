@@ -1,5 +1,6 @@
 package venta_condominio.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +18,9 @@ import venta_condominio.repository.ClienteRepositorio;
 
 @Service
 public class ClienteService {
+
+    /** Presupuesto mínimo razonable para comprar vivienda en el conjunto. */
+    private static final BigDecimal PRESUPUESTO_MINIMO = new BigDecimal("50000000");
 
     private final ClienteRepositorio clienteRepositorio;
     private final UsuarioService usuarioService;
@@ -70,6 +74,18 @@ public class ClienteService {
             throw new UsuarioException("El correo electrónico no es válido");
         }
 
+        if (request.getSalario() == null || request.getSalario().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new UsuarioException("El salario mensual debe ser mayor a cero");
+        }
+
+        if (request.getPresupuesto() == null || request.getPresupuesto().compareTo(PRESUPUESTO_MINIMO) < 0) {
+            throw new UsuarioException("El presupuesto para la vivienda debe ser de al menos $ 50.000.000");
+        }
+
+        if (request.getPresupuesto().compareTo(request.getSalario()) <= 0) {
+            throw new UsuarioException("El presupuesto debe ser mayor al salario mensual");
+        }
+
         Municipio municipio = new Municipio(
                 request.getMunicipio(),
                 request.getDepartamento()
@@ -87,6 +103,12 @@ public class ClienteService {
         if (clienteRepositorio.buscarPorCedula(cliente.getCedula()) != null) {
             throw new UsuarioException(
                     "Ya existe un cliente registrado con esa cédula"
+            );
+        }
+
+        if (clienteRepositorio.buscarPorTelefono(cliente.getTelefono()) != null) {
+            throw new UsuarioException(
+                    "Ya existe un cliente registrado con ese teléfono"
             );
         }
 

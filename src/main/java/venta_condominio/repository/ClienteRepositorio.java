@@ -12,6 +12,17 @@ public interface ClienteRepositorio {
 
     Cliente buscarPorEmail(String email);
 
+    default Cliente buscarPorTelefono(String telefono) {
+        if (telefono == null) {
+            return null;
+        }
+
+        return listar().stream()
+                .filter(c -> telefono.trim().equals(c.getTelefono()))
+                .findFirst()
+                .orElse(null);
+    }
+
     default Cliente buscarPorCedula(String cedula) {
         if (cedula == null) {
             return null;
