@@ -64,6 +64,16 @@ public class GlobalExceptionHandler {
                 .body(Map.of("mensaje", exception.getMessage()));
     }
 
+    /** Formato de imagen no permitido (GIF, etc.) y otros datos inválidos. */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> manejarIllegalArgumentException(
+            IllegalArgumentException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("mensaje", exception.getMessage()));
+    }
+
     /** R001: sin sesión o sin registro completo no se ven unidades. */
     @ExceptionHandler(AccesoDenegadoException.class)
     public ResponseEntity<Map<String, String>> manejarAccesoDenegadoException(

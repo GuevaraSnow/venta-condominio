@@ -33,6 +33,10 @@ function enmascararCorreo(correo) {
   return `${usuario[0]}${"*".repeat(usuario.length - 4)}${usuario.slice(-3)}@${dominio}`;
 }
 
+// Fotos: solo JPG, PNG o WEBP (nada de GIF animados)
+const FORMATOS_IMAGEN = ["image/jpeg", "image/png", "image/webp"];
+const esImagenPermitida = (archivo) => FORMATOS_IMAGEN.includes(archivo?.type);
+
 function App() {
   const [vista, setVista] = useState("login");
   const [codigoVerificacion, setCodigoVerificacion] = useState("");
@@ -62,7 +66,7 @@ function App() {
     salario: "",
     presupuesto: "",
     tipoInmueble: "",
-    departamento: "",
+    departamento: "QUINDIO", // solo operamos en el Quindío
     municipio: "",
   });
 
@@ -697,6 +701,12 @@ function App() {
 
     if (!archivo || !unidadSeleccionada) return;
 
+    if (!esImagenPermitida(archivo)) {
+      alert("Solo se permiten imágenes JPG, PNG o WEBP");
+      evento.target.value = "";
+      return;
+    }
+
     const lector = new FileReader();
 
     lector.onload = async () => {
@@ -757,6 +767,12 @@ function App() {
     const archivo = evento.target.files?.[0];
 
     if (!archivo) return;
+
+    if (!esImagenPermitida(archivo)) {
+      alert("Solo se permiten imágenes JPG, PNG o WEBP");
+      evento.target.value = "";
+      return;
+    }
 
     const lector = new FileReader();
 
@@ -1196,21 +1212,7 @@ function App() {
 
                     <div className="input-group">
                       <label>Departamento</label>
-                      <select
-                          name="departamento"
-                          value={formulario.departamento}
-                          onChange={manejarCambio}
-                          required
-                      >
-                        <option value="" disabled>
-                          Seleccionar
-                        </option>
-                        {Object.keys(departamentos).map((departamento) => (
-                            <option key={departamento} value={departamento}>
-                              {departamento.replaceAll("_", " ")}
-                            </option>
-                        ))}
-                      </select>
+                      <input value="Quindío" readOnly disabled />
                     </div>
 
                     <div className="input-group">
@@ -1677,7 +1679,7 @@ function App() {
                           {subiendoFoto ? "Subiendo..." : "Cambiar foto"}
                           <input
                               type="file"
-                              accept="image/*"
+                              accept="image/jpeg,image/png,image/webp"
                               onChange={manejarCambioFoto}
                               disabled={subiendoFoto}
                               hidden
@@ -1761,7 +1763,7 @@ function App() {
                         {subiendoFotoUnidad ? "Subiendo..." : "Agregar foto"}
                         <input
                             type="file"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/webp"
                             onChange={manejarCambioFotoUnidad}
                             disabled={subiendoFotoUnidad}
                             hidden

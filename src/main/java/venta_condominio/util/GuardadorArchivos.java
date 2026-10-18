@@ -43,6 +43,7 @@ public class GuardadorArchivos {
             return "webp";
         }
 
-        return "jpg";
+        // GIF u otros formatos no se aceptan (las fotos de perfil no deben ser animadas)
+        throw new IllegalArgumentException("Solo se permiten imágenes JPG, PNG o WEBP");
     }
 }
