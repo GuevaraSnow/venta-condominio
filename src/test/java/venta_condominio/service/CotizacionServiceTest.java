@@ -199,7 +199,7 @@ class CotizacionServiceTest {
         cambiarCifras("3000000", "90000000");
 
         ValidacionCotizacionException e = assertThrows(ValidacionCotizacionException.class, () -> crear("0"));
-        assertTrue(e.getMessage().contains("salario"));
+        assertTrue(e.getMessage().contains("ingresos"));
     }
 
     @Test

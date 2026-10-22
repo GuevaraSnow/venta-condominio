@@ -96,7 +96,7 @@ public class ClienteService {
         }
 
         if (request.getSalario() == null || request.getSalario().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new UsuarioException("El salario mensual debe ser mayor a cero");
+            throw new UsuarioException("Los ingresos mensuales del hogar deben ser mayores a cero");
         }
 
         if (request.getPresupuesto() == null || request.getPresupuesto().compareTo(PRESUPUESTO_MINIMO) < 0) {
@@ -217,7 +217,7 @@ public class ClienteService {
         Cliente cliente = exigirCliente(emailCliente);
 
         if (request.getSalario() == null || request.getSalario().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new UsuarioException("El salario mensual debe ser mayor a cero");
+            throw new UsuarioException("Los ingresos mensuales del hogar deben ser mayores a cero");
         }
 
         if (request.getPresupuesto() == null || request.getPresupuesto().compareTo(PRESUPUESTO_MINIMO) < 0) {

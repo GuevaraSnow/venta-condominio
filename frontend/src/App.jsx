@@ -1181,7 +1181,10 @@ function App() {
                     </div>
 
                     <div className="input-group">
-                      <label>Salario mensual</label>
+                      <label>Ingresos mensuales del hogar</label>
+                      <small className="input-ayuda">
+                        Suma tus ingresos y los de quien compre contigo (pareja o codeudor).
+                      </small>
                       <input
                           type="text"
                           inputMode="numeric"
@@ -1201,7 +1204,7 @@ function App() {
                       <label>Dinero disponible para la cuota inicial</label>
                       <small className="input-ayuda">
                         La cuota inicial es el 30 % del precio de la vivienda. Después de
-                        registrarte, solo tu asesor puede cambiar este valor y tu salario.
+                        registrarte, solo tu asesor puede cambiar este valor y tus ingresos.
                       </small>
                       <input
                           type="text"

@@ -114,7 +114,7 @@ function TarjetaCotizacion({ cotizacion, mostrarCliente, acciones }) {
             <dt>Cuota mensual estimada (20 años)</dt>
             <dd>{pesos(cotizacion.cuotaMensualEstimada)}</dd>
 
-            <dt>Salario mínimo requerido</dt>
+            <dt>Ingreso mínimo requerido</dt>
             <dd>{pesos(cotizacion.salarioMinimoRequerido)}</dd>
           </>
         )}
@@ -122,7 +122,7 @@ function TarjetaCotizacion({ cotizacion, mostrarCliente, acciones }) {
 
       {cotizacion.presupuestoCliente != null && (
         <p className="cot-fechas">
-          Precalificada con presupuesto de {pesos(cotizacion.presupuestoCliente)} y salario de{" "}
+          Precalificada con presupuesto de {pesos(cotizacion.presupuestoCliente)} e ingresos del hogar de{" "}
           {pesos(cotizacion.salarioCliente)}
         </p>
       )}

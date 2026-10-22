@@ -66,7 +66,7 @@ public class Cliente {
 
         if (salario == null || salario.compareTo(BigDecimal.ZERO) < 0) {
             throw new ValidacionClienteException(
-                    "El salario no puede ser negativo"
+                    "Los ingresos del hogar no pueden ser negativos"
             );
         }
 

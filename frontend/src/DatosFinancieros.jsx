@@ -97,7 +97,7 @@ export default function DatosFinancieros({ usuario }) {
     <div className="df-view">
       <h2>Datos financieros de clientes</h2>
       <p>
-        El salario y el dinero disponible para la cuota inicial los declara el cliente al
+        Los ingresos del hogar y el dinero disponible para la cuota inicial los declara el cliente al
         registrarse. Solo el equipo comercial puede actualizarlos, con un soporte.
       </p>
 
@@ -119,12 +119,12 @@ export default function DatosFinancieros({ usuario }) {
       {actuales && (
         <form className="df-form" onSubmit={guardar}>
           <p>
-            Actual: salario <strong>{pesos(actuales.salario)}</strong> · cuota inicial disponible{" "}
+            Actual: ingresos del hogar <strong>{pesos(actuales.salario)}</strong> · cuota inicial disponible{" "}
             <strong>{pesos(actuales.presupuesto)}</strong>
           </p>
 
           <div className="input-group">
-            <label>Nuevo salario mensual</label>
+            <label>Nuevos ingresos mensuales del hogar</label>
             <input
               type="text"
               inputMode="numeric"
@@ -149,7 +149,7 @@ export default function DatosFinancieros({ usuario }) {
             <label>Soporte que justifica el cambio</label>
             <input
               type="text"
-              placeholder="Ej. certificado laboral de octubre, extracto bancario"
+              placeholder="Ej. certificado laboral, ingresos del codeudor, extracto bancario"
               value={form.motivo}
               onChange={(e) => setForm({ ...form, motivo: e.target.value })}
               required
@@ -172,7 +172,7 @@ export default function DatosFinancieros({ usuario }) {
               <thead>
                 <tr>
                   <th>Fecha</th>
-                  <th>Salario</th>
+                  <th>Ingresos del hogar</th>
                   <th>Cuota inicial disponible</th>
                   <th>Hecho por</th>
                   <th>Soporte</th>

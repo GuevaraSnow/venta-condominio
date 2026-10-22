@@ -15,8 +15,9 @@ import venta_condominio.patrones.CotizacionFactory;
  *  1. Cuota inicial: el 30 % del precio final debe caber en el presupuesto
  *     disponible para la cuota inicial.
  *  2. Capacidad de pago (R005): el 70 % restante se simula como crédito
- *     hipotecario de cuota fija y esa cuota no puede superar el 30 % del
- *     salario mensual.
+ *     hipotecario de cuota fija y esa cuota no puede superar el 30 % de los
+ *     ingresos mensuales del hogar (el campo "salario" suma los ingresos de
+ *     quienes compran juntos: pareja o codeudor, como lo aceptan los bancos).
  *
  * Es una PRECALIFICACIÓN: la validación definitiva la hace la entidad
  * financiera en F-05. La tasa es una referencia para el proyecto.
@@ -60,7 +61,7 @@ public final class Precalificacion {
             }
             if (!alcanzaCuotaMensual) {
                 return "La cuota mensual estimada (" + CotizacionService.pesos(cuotaMensual)
-                        + ") supera el 30 % del salario; se requiere un salario de al menos "
+                        + ") supera el 30 % de los ingresos del hogar; se requieren ingresos de al menos "
                         + CotizacionService.pesos(salarioMinimo);
             }
             return null;
