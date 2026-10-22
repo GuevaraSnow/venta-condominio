@@ -44,3 +44,5 @@ usuarios.json
 frontend/node_modules/
 frontend/dist/unidades.json
 uploads/
+
+historial_financiero.json

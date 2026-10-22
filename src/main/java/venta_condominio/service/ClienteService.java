@@ -1,6 +1,7 @@
 package venta_condominio.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,30 +11,50 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import venta_condominio.exception.UsuarioException;
+import venta_condominio.model.CambioDatosFinancieros;
 import venta_condominio.model.Cliente;
+import venta_condominio.model.DatosFinancierosRequest;
+import venta_condominio.model.EstadoUnidad;
+import venta_condominio.model.Unidad;
+import venta_condominio.model.Usuario;
 import venta_condominio.model.Municipio;
 import venta_condominio.model.RegistroClienteRequest;
 import venta_condominio.model.Rol;
 import venta_condominio.repository.ClienteRepositorio;
+import venta_condominio.repository.HistorialFinancieroRepositorio;
+import venta_condominio.repository.UnidadRepositorio;
+import venta_condominio.repository.UsuarioRepositorio;
 
 @Service
 public class ClienteService {
 
-    /** Presupuesto mínimo razonable para comprar vivienda en el conjunto. */
-    private static final BigDecimal PRESUPUESTO_MINIMO = new BigDecimal("50000000");
+    /**
+     * El presupuesto es el dinero disponible para la CUOTA INICIAL.
+     * Mínimo: la cuota de reserva más baja (R002, $5.000.000).
+     */
+    private static final BigDecimal PRESUPUESTO_MINIMO = new BigDecimal("5000000");
 
     private final ClienteRepositorio clienteRepositorio;
     private final UsuarioService usuarioService;
     private final VerificacionEmailService verificacionEmailService;
+    private final UsuarioRepositorio usuarioRepositorio;
+    private final UnidadRepositorio unidadRepositorio;
+    private final HistorialFinancieroRepositorio historialRepositorio;
 
     public ClienteService(
             ClienteRepositorio clienteRepositorio,
             UsuarioService usuarioService,
-            VerificacionEmailService verificacionEmailService) {
+            VerificacionEmailService verificacionEmailService,
+            UsuarioRepositorio usuarioRepositorio,
+            UnidadRepositorio unidadRepositorio,
+            HistorialFinancieroRepositorio historialRepositorio) {
 
         this.clienteRepositorio = clienteRepositorio;
         this.usuarioService = usuarioService;
         this.verificacionEmailService = verificacionEmailService;
+        this.usuarioRepositorio = usuarioRepositorio;
+        this.unidadRepositorio = unidadRepositorio;
+        this.historialRepositorio = historialRepositorio;
     }
 
     /**
@@ -79,11 +100,7 @@ public class ClienteService {
         }
 
         if (request.getPresupuesto() == null || request.getPresupuesto().compareTo(PRESUPUESTO_MINIMO) < 0) {
-            throw new UsuarioException("El presupuesto para la vivienda debe ser de al menos $ 50.000.000");
-        }
-
-        if (request.getPresupuesto().compareTo(request.getSalario()) <= 0) {
-            throw new UsuarioException("El presupuesto debe ser mayor al salario mensual");
+            throw new UsuarioException("El dinero disponible para la cuota inicial debe ser de al menos $ 5.000.000");
         }
 
         Municipio municipio = new Municipio(
@@ -179,5 +196,142 @@ public class ClienteService {
         }
 
         return resumen;
+    }
+
+    // =====================================================
+    // Datos financieros (solo el equipo comercial los cambia)
+    // =====================================================
+
+    /**
+     * El cliente NO puede cambiar su salario ni su presupuesto: los declara una vez
+     * al registrarse. Solo el asesor o el director los actualizan, después de revisar
+     * soportes, y cada cambio queda en el historial (auditoría).
+     */
+    public Cliente actualizarDatosFinancieros(String emailCliente, DatosFinancierosRequest request) {
+
+        if (request == null) {
+            throw new UsuarioException("Faltan los datos a actualizar");
+        }
+
+        Usuario asesor = exigirEquipo(request.getEmailAsesor());
+        Cliente cliente = exigirCliente(emailCliente);
+
+        if (request.getSalario() == null || request.getSalario().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new UsuarioException("El salario mensual debe ser mayor a cero");
+        }
+
+        if (request.getPresupuesto() == null || request.getPresupuesto().compareTo(PRESUPUESTO_MINIMO) < 0) {
+            throw new UsuarioException("El dinero disponible para la cuota inicial debe ser de al menos $ 5.000.000");
+        }
+
+        String motivo = limpio(request.getMotivo());
+
+        if (motivo == null || motivo.length() < 5) {
+            throw new UsuarioException("Indica el soporte que justifica el cambio (ej. certificado laboral, extracto bancario)");
+        }
+
+        if (request.getSalario().compareTo(cliente.getSalario()) == 0
+                && request.getPresupuesto().compareTo(cliente.getPresupuesto()) == 0) {
+            throw new UsuarioException("Los valores son iguales a los actuales; no hay nada que cambiar");
+        }
+
+        Cliente actualizado = cliente.conDatosFinancieros(request.getSalario(), request.getPresupuesto());
+        clienteRepositorio.actualizar(actualizado);
+
+        historialRepositorio.guardar(new CambioDatosFinancieros(
+                UUID.randomUUID().toString(),
+                cliente.getEmail(),
+                cliente.getSalario(),
+                actualizado.getSalario(),
+                cliente.getPresupuesto(),
+                actualizado.getPresupuesto(),
+                asesor.getEmail(),
+                LocalDateTime.now().withNano(0).toString(),
+                motivo
+        ));
+
+        return actualizado;
+    }
+
+    /** Salario y presupuesto actuales: los ve el equipo comercial o el propio cliente. */
+    public Map<String, Object> datosFinancieros(String emailCliente, String emailSolicitante) {
+
+        Cliente cliente = exigirCliente(emailCliente);
+        exigirClienteOEquipo(cliente, emailSolicitante);
+
+        Map<String, Object> datos = new LinkedHashMap<>();
+        datos.put("email", cliente.getEmail());
+        datos.put("nombre", (cliente.getNombre() + " " + cliente.getPrimerApellido()).trim());
+        datos.put("salario", cliente.getSalario());
+        datos.put("presupuesto", cliente.getPresupuesto());
+        return datos;
+    }
+
+    /** Historial de cambios de salario/presupuesto de un cliente (más reciente primero). */
+    public List<CambioDatosFinancieros> historialFinanciero(String emailCliente, String emailSolicitante) {
+
+        exigirEquipo(emailSolicitante);
+
+        return historialRepositorio.listar().stream()
+                .filter(c -> c.getEmailCliente().equalsIgnoreCase(limpio(emailCliente)))
+                .sorted((a, b) -> String.valueOf(b.getFecha()).compareTo(String.valueOf(a.getFecha())))
+                .toList();
+    }
+
+    /**
+     * Para cada unidad disponible, si está al alcance del cliente
+     * (precalificación sin descuento). Lo usa el listado de unidades.
+     */
+    public List<Map<String, Object>> alcance(String emailCliente) {
+
+        Cliente cliente = exigirCliente(emailCliente);
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        for (Unidad unidad : unidadRepositorio.listarPorEstado(EstadoUnidad.DISPONIBLE)) {
+
+            Precalificacion.Resultado r = Precalificacion.evaluar(cliente, unidad.getPrecioLista(), BigDecimal.ZERO);
+
+            Map<String, Object> fila = new LinkedHashMap<>();
+            fila.put("identificador", unidad.getIdentificador());
+            fila.put("alcanza", r.aprobado());
+            fila.put("cuotaInicial", r.cuotaInicial());
+            fila.put("cuotaMensual", r.cuotaMensual());
+            fila.put("salarioMinimo", r.salarioMinimo());
+            fila.put("motivo", r.motivo());
+            resultado.add(fila);
+        }
+
+        return resultado;
+    }
+
+    private Cliente exigirCliente(String emailCliente) {
+
+        Cliente cliente = emailCliente == null ? null : clienteRepositorio.buscarPorEmail(limpio(emailCliente));
+
+        if (cliente == null) {
+            throw new UsuarioException("No se encontró el cliente");
+        }
+
+        return cliente;
+    }
+
+    private Usuario exigirEquipo(String email) {
+
+        Usuario usuario = email == null ? null : usuarioRepositorio.buscarPorEmail(limpio(email));
+
+        if (usuario == null || !usuario.isActivo() || usuario.getRol() == Rol.CLIENTE) {
+            throw new UsuarioException("Solo el asesor o el director comercial pueden hacer esto");
+        }
+
+        return usuario;
+    }
+
+    private void exigirClienteOEquipo(Cliente cliente, String emailSolicitante) {
+
+        if (emailSolicitante != null && cliente.getEmail().equalsIgnoreCase(limpio(emailSolicitante))) {
+            return;
+        }
+
+        exigirEquipo(emailSolicitante);
     }
 }

@@ -10,6 +10,7 @@ import venta_condominio.model.Cotizacion;
 import venta_condominio.model.EstadoCotizacion;
 import venta_condominio.model.Unidad;
 import venta_condominio.model.Usuario;
+import venta_condominio.service.Precalificacion;
 
 /**
  * PATRÓN FACTORY (creacional).
@@ -53,6 +54,16 @@ public class CotizacionFactory {
 
     public Cotizacion crear(Unidad unidad, Cliente cliente, Usuario asesor,
                             BigDecimal porcentajeDescuento, LocalDate hoy) {
+        return crear(unidad, cliente, asesor, porcentajeDescuento, hoy, null);
+    }
+
+    /**
+     * Igual que crear(...), pero guarda dentro de la cotización la "foto" de la
+     * precalificación (presupuesto y salario del cliente en ese momento).
+     */
+    public Cotizacion crear(Unidad unidad, Cliente cliente, Usuario asesor,
+                            BigDecimal porcentajeDescuento, LocalDate hoy,
+                            Precalificacion.Resultado precalificacion) {
 
         Calculo calculo = calcular(unidad.getPrecioLista(), porcentajeDescuento);
 
@@ -79,7 +90,11 @@ public class CotizacionFactory {
                 hoy.plusDays(DIAS_VIGENCIA).toString(),
                 estadoInicial,
                 null,
-                null
+                null,
+                precalificacion == null ? null : precalificacion.presupuesto(),
+                precalificacion == null ? null : precalificacion.salario(),
+                precalificacion == null ? null : precalificacion.cuotaMensual(),
+                precalificacion == null ? null : precalificacion.salarioMinimo()
         );
     }
 }

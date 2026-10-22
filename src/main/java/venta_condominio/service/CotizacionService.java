@@ -105,8 +105,18 @@ public class CotizacionService extends PublicadorEventos {
                     + DESCUENTO_MAXIMO.toPlainString() + " %");
         }
 
+        // Precalificación: cuota inicial vs. presupuesto y cuota mensual vs. salario (R005)
+        Precalificacion.Resultado precalificacion =
+                Precalificacion.evaluar(cliente, unidad.getPrecioLista(), descuento);
+
+        if (!precalificacion.aprobado()) {
+            throw new ValidacionCotizacionException("El cliente no precalifica para "
+                    + unidad.getIdentificador() + ": " + precalificacion.motivo());
+        }
+
         // Patrón Factory: la fábrica aplica cálculos, vigencia y estado inicial (R003)
-        Cotizacion cotizacion = fabrica.crear(unidad, cliente, asesor, descuento, hoy.get());
+        // y guarda la "foto" de la precalificación dentro de la cotización
+        Cotizacion cotizacion = fabrica.crear(unidad, cliente, asesor, descuento, hoy.get(), precalificacion);
 
         cotizacionRepositorio.guardar(cotizacion);
 

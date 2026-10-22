@@ -29,6 +29,7 @@ class CotizacionServiceTest {
     private CotizacionesEnMemoria cotizaciones;
     private UnidadesEnMemoria unidades;
     private CotizacionService service;
+    private ClientesEnMemoria clientes;
     private LocalDate hoy;
 
     @BeforeEach
@@ -36,12 +37,12 @@ class CotizacionServiceTest {
         cotizaciones = new CotizacionesEnMemoria();
         unidades = new UnidadesEnMemoria();
 
-        ClientesEnMemoria clientes = new ClientesEnMemoria();
+        clientes = new ClientesEnMemoria();
         UsuariosEnMemoria usuarios = new UsuariosEnMemoria();
 
         Municipio armenia = new Municipio("Armenia", Departamento.QUINDIO);
         clientes.guardar(new Cliente("Laura", "Gómez", "Restrepo", "1094887654", CLIENTE, "3104567890",
-                new BigDecimal("6500000"), new BigDecimal("280000000"), "APARTAMENTO", Departamento.QUINDIO, armenia));
+                new BigDecimal("8000000"), new BigDecimal("90000000"), "APARTAMENTO", Departamento.QUINDIO, armenia));
 
         usuarios.guardar(new Usuario("1", "Asesor", ASESOR, "x", Rol.ASESOR_COMERCIAL, true, null, true, null));
         usuarios.guardar(new Usuario("2", "Director", DIRECTOR, "x", Rol.DIRECTOR_COMERCIAL, true, null, true, null));
@@ -166,6 +167,53 @@ class CotizacionServiceTest {
         service.suscribir(evento -> { throw new RuntimeException("correo caído"); });
 
         assertEquals(EstadoCotizacion.GENERADA, crear("0").getEstado());
+    }
+
+    // ------------------------------------------------ precalificación
+
+    private void cambiarCifras(String salario, String presupuesto) {
+        Cliente actual = clientes.buscarPorEmail(CLIENTE);
+        clientes.actualizar(actual.conDatosFinancieros(new BigDecimal(salario), new BigDecimal(presupuesto)));
+    }
+
+    @Test
+    void calculaCuotaMensualDelCredito() {
+        // 175 millones a 20 años con 12 % E.A. -> cerca de 1,85 millones al mes
+        BigDecimal cuota = Precalificacion.cuotaMensual(new BigDecimal("175000000"));
+
+        assertTrue(cuota.compareTo(new BigDecimal("1850000")) > 0);
+        assertTrue(cuota.compareTo(new BigDecimal("1856000")) < 0);
+        assertEquals(new BigDecimal("6175304"), Precalificacion.salarioMinimo(cuota));
+    }
+
+    @Test
+    void noCotizaSiLaCuotaInicialSuperaElPresupuesto() {
+        cambiarCifras("8000000", "50000000"); // cuota inicial de APT-801 = 85.500.000
+
+        ValidacionCotizacionException e = assertThrows(ValidacionCotizacionException.class, () -> crear("0"));
+        assertTrue(e.getMessage().contains("cuota inicial"));
+    }
+
+    @Test
+    void noCotizaSiElSalarioNoAlcanzaParaLaCuotaMensual() {
+        cambiarCifras("3000000", "90000000");
+
+        ValidacionCotizacionException e = assertThrows(ValidacionCotizacionException.class, () -> crear("0"));
+        assertTrue(e.getMessage().contains("salario"));
+    }
+
+    @Test
+    void laCotizacionGuardaLaFotoDeLaPrecalificacion() {
+        Cotizacion cotizacion = crear("0");
+
+        assertEquals(new BigDecimal("90000000"), cotizacion.getPresupuestoCliente());
+        assertEquals(new BigDecimal("8000000"), cotizacion.getSalarioCliente());
+        assertNotNull(cotizacion.getCuotaMensualEstimada());
+
+        // si después cambian las cifras del cliente, la cotización no cambia
+        cambiarCifras("9000000", "120000000");
+        Cotizacion guardada = service.listar().get(0);
+        assertEquals(new BigDecimal("90000000"), guardada.getPresupuestoCliente());
     }
 
     // ------------------------------------------------ repositorios en memoria

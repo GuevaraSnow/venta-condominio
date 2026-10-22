@@ -33,6 +33,25 @@ public class Cotizacion {
     private final String gestionadoPor;
     private final String observacion;
 
+    // "Foto" de la precalificación: con qué cifras del cliente se aprobó la cotización.
+    // Si después cambian los datos del cliente, esto queda igual como evidencia.
+    private final BigDecimal presupuestoCliente;
+    private final BigDecimal salarioCliente;
+    private final BigDecimal cuotaMensualEstimada;
+    private final BigDecimal salarioMinimoRequerido;
+
+    /** Constructor sin la foto de precalificación (cotizaciones antiguas y pruebas). */
+    public Cotizacion(String id, String identificadorUnidad, String emailCliente, String nombreCliente,
+                      String emailAsesor, BigDecimal precioLista, BigDecimal porcentajeDescuento,
+                      BigDecimal valorDescuento, BigDecimal precioFinal, BigDecimal cuotaInicial,
+                      BigDecimal saldoFinanciar, String fechaCreacion, String fechaVencimiento,
+                      EstadoCotizacion estado, String gestionadoPor, String observacion) {
+        this(id, identificadorUnidad, emailCliente, nombreCliente, emailAsesor, precioLista,
+                porcentajeDescuento, valorDescuento, precioFinal, cuotaInicial, saldoFinanciar,
+                fechaCreacion, fechaVencimiento, estado, gestionadoPor, observacion,
+                null, null, null, null);
+    }
+
     @JsonCreator
     public Cotizacion(
             @JsonProperty("id") String id,
@@ -50,7 +69,11 @@ public class Cotizacion {
             @JsonProperty("fechaVencimiento") String fechaVencimiento,
             @JsonProperty("estado") EstadoCotizacion estado,
             @JsonProperty("gestionadoPor") String gestionadoPor,
-            @JsonProperty("observacion") String observacion) {
+            @JsonProperty("observacion") String observacion,
+            @JsonProperty("presupuestoCliente") BigDecimal presupuestoCliente,
+            @JsonProperty("salarioCliente") BigDecimal salarioCliente,
+            @JsonProperty("cuotaMensualEstimada") BigDecimal cuotaMensualEstimada,
+            @JsonProperty("salarioMinimoRequerido") BigDecimal salarioMinimoRequerido) {
 
         if (id == null || id.isBlank()) {
             throw new ValidacionCotizacionException("El id de la cotización es obligatorio");
@@ -84,6 +107,10 @@ public class Cotizacion {
         this.estado = estado;
         this.gestionadoPor = gestionadoPor;
         this.observacion = observacion;
+        this.presupuestoCliente = presupuestoCliente;
+        this.salarioCliente = salarioCliente;
+        this.cuotaMensualEstimada = cuotaMensualEstimada;
+        this.salarioMinimoRequerido = salarioMinimoRequerido;
     }
 
     /** Copia de la cotización con otro estado. */
@@ -92,7 +119,8 @@ public class Cotizacion {
                 precioLista, porcentajeDescuento, valorDescuento, precioFinal, cuotaInicial,
                 saldoFinanciar, fechaCreacion, fechaVencimiento, nuevoEstado,
                 gestionadoPor != null ? gestionadoPor : this.gestionadoPor,
-                observacion != null ? observacion : this.observacion);
+                observacion != null ? observacion : this.observacion,
+                presupuestoCliente, salarioCliente, cuotaMensualEstimada, salarioMinimoRequerido);
     }
 
     /** Vencida = todavía no firmada ni cerrada y ya pasó su fecha de vencimiento. */
@@ -121,4 +149,8 @@ public class Cotizacion {
     public EstadoCotizacion getEstado() { return estado; }
     public String getGestionadoPor() { return gestionadoPor; }
     public String getObservacion() { return observacion; }
+    public BigDecimal getPresupuestoCliente() { return presupuestoCliente; }
+    public BigDecimal getSalarioCliente() { return salarioCliente; }
+    public BigDecimal getCuotaMensualEstimada() { return cuotaMensualEstimada; }
+    public BigDecimal getSalarioMinimoRequerido() { return salarioMinimoRequerido; }
 }

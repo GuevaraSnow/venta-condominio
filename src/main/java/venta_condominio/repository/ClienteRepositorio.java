@@ -35,4 +35,10 @@ public interface ClienteRepositorio {
     }
 
     void eliminar(String email);
+
+    /** Reemplaza el cliente con el mismo correo. */
+    default void actualizar(Cliente cliente) {
+        eliminar(cliente.getEmail());
+        guardar(cliente);
+    }
 }

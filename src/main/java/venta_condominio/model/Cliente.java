@@ -107,6 +107,12 @@ public class Cliente {
         this.municipio = municipio;
     }
 
+    /** Copia del cliente con salario y presupuesto nuevos (solo lo usa el asesor). */
+    public Cliente conDatosFinancieros(BigDecimal nuevoSalario, BigDecimal nuevoPresupuesto) {
+        return new Cliente(nombre, primerApellido, segundoApellido, cedula, email, telefono,
+                nuevoSalario, nuevoPresupuesto, tipoInmueble, departamento, municipio);
+    }
+
     public String getNombre() {
         return nombre;
     }

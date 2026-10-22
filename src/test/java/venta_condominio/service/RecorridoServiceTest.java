@@ -35,7 +35,7 @@ class RecorridoServiceTest {
 
         Municipio armenia = new Municipio("Armenia", Departamento.QUINDIO);
         clientes.guardar(new Cliente("Laura", "Gómez", "Restrepo", "1094887654", CLIENTE, "3104567890",
-                new BigDecimal("6500000"), new BigDecimal("280000000"), "APARTAMENTO", Departamento.QUINDIO, armenia));
+                new BigDecimal("8000000"), new BigDecimal("90000000"), "APARTAMENTO", Departamento.QUINDIO, armenia));
 
         usuarios.guardar(new Usuario("1", "Asesor", ASESOR, "x", Rol.ASESOR_COMERCIAL, true, null, true, null));
         usuarios.guardar(new Usuario("2", "Laura", CLIENTE, "x", Rol.CLIENTE, true, null, true, null));
