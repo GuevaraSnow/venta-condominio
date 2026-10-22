@@ -108,7 +108,24 @@ function TarjetaCotizacion({ cotizacion, mostrarCliente, acciones }) {
 
         <dt>Saldo a financiar</dt>
         <dd>{pesos(cotizacion.saldoFinanciar)}</dd>
+
+        {cotizacion.cuotaMensualEstimada != null && (
+          <>
+            <dt>Cuota mensual estimada (20 años)</dt>
+            <dd>{pesos(cotizacion.cuotaMensualEstimada)}</dd>
+
+            <dt>Salario mínimo requerido</dt>
+            <dd>{pesos(cotizacion.salarioMinimoRequerido)}</dd>
+          </>
+        )}
       </dl>
+
+      {cotizacion.presupuestoCliente != null && (
+        <p className="cot-fechas">
+          Precalificada con presupuesto de {pesos(cotizacion.presupuestoCliente)} y salario de{" "}
+          {pesos(cotizacion.salarioCliente)}
+        </p>
+      )}
 
       <p className="cot-fechas">
         Generada el {fecha(cotizacion.fechaCreacion)} · vence el {fecha(cotizacion.fechaVencimiento)}

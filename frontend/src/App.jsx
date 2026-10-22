@@ -4,11 +4,12 @@ import { API_URL, urlArchivo } from "./api";
 import Cotizaciones from "./Cotizaciones";
 import Reservas from "./Reservas";
 import Recorridos, { AgendarRecorrido } from "./Recorridos";
+import DatosFinancieros from "./DatosFinancieros";
 
 const PESTANAS_POR_ROL = {
   CLIENTE: ["unidades", "recorridos", "cotizaciones", "reservas", "perfil"],
-  ASESOR_COMERCIAL: ["unidades", "recorridos", "cotizaciones", "reservas", "perfil"],
-  DIRECTOR_COMERCIAL: ["unidades", "crear", "recorridos", "cotizaciones", "reservas", "perfil"],
+  ASESOR_COMERCIAL: ["unidades", "recorridos", "cotizaciones", "reservas", "clientes", "perfil"],
+  DIRECTOR_COMERCIAL: ["unidades", "crear", "recorridos", "cotizaciones", "reservas", "clientes", "perfil"],
 };
 
 const ETIQUETAS_PESTANA = {
@@ -17,6 +18,7 @@ const ETIQUETAS_PESTANA = {
   recorridos: "Recorridos",
   cotizaciones: "Cotizaciones",
   reservas: "Reservas",
+  clientes: "Clientes",
   perfil: "Mi perfil",
 };
 
@@ -75,6 +77,8 @@ function App() {
   // =========================================================
 
   const [unidades, setUnidades] = useState([]);
+  // Precalificación: identificador -> { alcanza, motivo, cuotaMensual } (solo clientes)
+  const [alcance, setAlcance] = useState({});
   const [cargandoUnidades, setCargandoUnidades] = useState(false);
   const [errorUnidades, setErrorUnidades] = useState("");
   const [unidadSeleccionada, setUnidadSeleccionada] = useState(null);
@@ -540,6 +544,22 @@ function App() {
       const datos = await respuesta.json();
 
       setUnidades(datos);
+
+      // Precalificación: qué unidades están al alcance del cliente.
+      // Para asesor/director el backend responde error y simplemente no se muestra.
+      try {
+        const respuestaAlcance = await fetch(
+            `${API_URL}/clientes/${encodeURIComponent(email || "")}/alcance`,
+        );
+        if (respuestaAlcance.ok) {
+          const filas = await respuestaAlcance.json();
+          setAlcance(Object.fromEntries(filas.map((f) => [f.identificador, f])));
+        } else {
+          setAlcance({});
+        }
+      } catch {
+        setAlcance({});
+      }
     } catch (error) {
       console.error(error);
       setErrorUnidades(
@@ -1178,7 +1198,11 @@ function App() {
                     </div>
 
                     <div className="input-group">
-                      <label>Presupuesto</label>
+                      <label>Dinero disponible para la cuota inicial</label>
+                      <small className="input-ayuda">
+                        La cuota inicial es el 30 % del precio de la vivienda. Después de
+                        registrarte, solo tu asesor puede cambiar este valor y tu salario.
+                      </small>
                       <input
                           type="text"
                           inputMode="numeric"
@@ -1440,6 +1464,23 @@ function App() {
                                             {formatearPrecio(unidad.precioLista)}
                                           </p>
 
+                                          {alcance[unidad.identificador] && (
+                                              <p
+                                                  className={
+                                                    alcance[unidad.identificador].alcanza
+                                                        ? "unit-alcance unit-alcance-si"
+                                                        : "unit-alcance unit-alcance-no"
+                                                  }
+                                                  title={alcance[unidad.identificador].motivo || ""}
+                                              >
+                                                {alcance[unidad.identificador].alcanza
+                                                    ? "Está a tu alcance"
+                                                    : "Fuera de tu alcance"}
+                                                {" · cuota aprox. "}
+                                                {formatearPrecio(alcance[unidad.identificador].cuotaMensual)}/mes
+                                              </p>
+                                          )}
+
                                           <p className="unit-ubicacion">
                                             {unidad.municipio?.nombre},{" "}
                                             {unidad.departamento?.replaceAll("_", " ")}
@@ -1655,6 +1696,12 @@ function App() {
                           usuario={usuarioActual}
                           onCambioUnidades={cargarUnidadesDisponibles}
                       />
+                  )}
+
+                  {/* ---- Pestaña: Clientes (asesor / director) ---- */}
+
+                  {pestanaActiva === "clientes" && (
+                      <DatosFinancieros usuario={usuarioActual} />
                   )}
 
                   {pestanaActiva === "perfil" && (
