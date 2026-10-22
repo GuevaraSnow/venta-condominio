@@ -908,3 +908,10 @@ button {
 .df-ok {
   color: #1d6b35;
 }
+
+.unit-alcance-motivo {
+  display: block;
+  margin-top: 2px;
+  font-weight: 400;
+  font-size: 0.8rem;
+}

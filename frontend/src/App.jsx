@@ -1525,6 +1525,11 @@ function App() {
                                                     : "Fuera de tu alcance"}
                                                 {" · cuota aprox. "}
                                                 {formatearPrecio(alcance[unidad.identificador].cuotaMensual)}/mes
+                                                {!alcance[unidad.identificador].alcanza && (
+                                                    <span className="unit-alcance-motivo">
+                                                      {alcance[unidad.identificador].motivo}
+                                                    </span>
+                                                )}
                                               </p>
                                           )}
 
