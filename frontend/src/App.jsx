@@ -89,6 +89,10 @@ function App() {
   // Filtros del listado (VC-39)
   const [filtroCiudad, setFiltroCiudad] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
+  // "" = todas, "SI" = solo las que están al alcance del cliente
+  const [filtroAlcance, setFiltroAlcance] = useState("");
+  // Orden del listado por precio de lista: "ASC" (menor a mayor) o "DESC"
+  const [ordenPrecio, setOrdenPrecio] = useState("ASC");
 
   const [formUnidad, setFormUnidad] = useState({
     identificador: "",
@@ -214,6 +218,7 @@ function App() {
       // (CASA o APARTAMENTO). Para roles internos viene vacío: "Ver todo".
       setFiltroTipo(datos.interesPrincipal || "");
       setFiltroCiudad("");
+      setFiltroAlcance("");
 
       const pestanasDisponibles = PESTANAS_POR_ROL[datos.rol] || ["unidades"];
 
@@ -697,7 +702,13 @@ function App() {
 
     const coincideTipo = !filtroTipo || unidad.tipoInmueble === filtroTipo;
 
-    return coincideCiudad && coincideTipo;
+    const coincideAlcance =
+        filtroAlcance !== "SI" || alcance[unidad.identificador]?.alcanza === true;
+
+    return coincideCiudad && coincideTipo && coincideAlcance;
+  }).sort((a, b) => {
+    const diferencia = Number(a.precioLista) - Number(b.precioLista);
+    return ordenPrecio === "DESC" ? -diferencia : diferencia;
   });
 
   // Ciudades que realmente tienen unidades, en orden alfabético
@@ -1419,13 +1430,42 @@ function App() {
                                   </select>
                                 </div>
 
-                                {(filtroCiudad || filtroTipo) && (
+                                {Object.keys(alcance).length > 0 && (
+                                    <div className="input-group">
+                                      <label>Alcance</label>
+                                      <select
+                                          value={filtroAlcance}
+                                          onChange={(evento) =>
+                                              setFiltroAlcance(evento.target.value)
+                                          }
+                                      >
+                                        <option value="">Todas</option>
+                                        <option value="SI">Solo a mi alcance</option>
+                                      </select>
+                                    </div>
+                                )}
+
+                                <div className="input-group">
+                                  <label>Ordenar por precio</label>
+                                  <select
+                                      value={ordenPrecio}
+                                      onChange={(evento) =>
+                                          setOrdenPrecio(evento.target.value)
+                                      }
+                                  >
+                                    <option value="ASC">Menor a mayor</option>
+                                    <option value="DESC">Mayor a menor</option>
+                                  </select>
+                                </div>
+
+                                {(filtroCiudad || filtroTipo || filtroAlcance) && (
                                     <button
                                         type="button"
                                         className="secondary-button units-filtros-limpiar"
                                         onClick={() => {
                                           setFiltroCiudad("");
                                           setFiltroTipo("");
+                                          setFiltroAlcance("");
                                         }}
                                     >
                                       Ver todo
@@ -1434,7 +1474,11 @@ function App() {
                               </div>
 
                               {unidadesFiltradas.length === 0 ? (
-                                  <p>Ninguna unidad coincide con los filtros.</p>
+                                  <p>
+                                    {filtroAlcance === "SI"
+                                        ? "Con tus datos actuales ninguna unidad de esta búsqueda está a tu alcance. Si tus ingresos o tu cuota inicial cambiaron, habla con tu asesor."
+                                        : "Ninguna unidad coincide con los filtros."}
+                                  </p>
                               ) : (
                                   <div className="units-grid">
                                     {unidadesFiltradas.map((unidad) => (
