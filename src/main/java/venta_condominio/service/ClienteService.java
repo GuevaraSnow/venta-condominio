@@ -199,12 +199,13 @@ public class ClienteService {
     }
 
     // =====================================================
-    // Datos financieros (solo el equipo comercial los cambia)
+    // Datos financieros (solo el director comercial los cambia)
     // =====================================================
 
     /**
      * El cliente NO puede cambiar su salario ni su presupuesto: los declara una vez
-     * al registrarse. Solo el asesor o el director los actualizan, después de revisar
+     * al registrarse. Solo el DIRECTOR COMERCIAL los actualiza (el asesor solo hace
+     * recorridos y cotizaciones), después de revisar
      * soportes, y cada cambio queda en el historial (auditoría).
      */
     public Cliente actualizarDatosFinancieros(String emailCliente, DatosFinancierosRequest request) {
@@ -213,7 +214,7 @@ public class ClienteService {
             throw new UsuarioException("Faltan los datos a actualizar");
         }
 
-        Usuario asesor = exigirEquipo(request.getEmailAsesor());
+        Usuario director = exigirDirector(request.getEmailAsesor());
         Cliente cliente = exigirCliente(emailCliente);
 
         if (request.getSalario() == null || request.getSalario().compareTo(BigDecimal.ZERO) <= 0) {
@@ -245,7 +246,7 @@ public class ClienteService {
                 actualizado.getSalario(),
                 cliente.getPresupuesto(),
                 actualizado.getPresupuesto(),
-                asesor.getEmail(),
+                director.getEmail(),
                 LocalDateTime.now().withNano(0).toString(),
                 motivo
         ));
@@ -253,11 +254,11 @@ public class ClienteService {
         return actualizado;
     }
 
-    /** Salario y presupuesto actuales: los ve el equipo comercial o el propio cliente. */
+    /** Salario y presupuesto actuales: los ve el director comercial o el propio cliente. */
     public Map<String, Object> datosFinancieros(String emailCliente, String emailSolicitante) {
 
         Cliente cliente = exigirCliente(emailCliente);
-        exigirClienteOEquipo(cliente, emailSolicitante);
+        exigirClienteODirector(cliente, emailSolicitante);
 
         Map<String, Object> datos = new LinkedHashMap<>();
         datos.put("email", cliente.getEmail());
@@ -270,7 +271,7 @@ public class ClienteService {
     /** Historial de cambios de salario/presupuesto de un cliente (más reciente primero). */
     public List<CambioDatosFinancieros> historialFinanciero(String emailCliente, String emailSolicitante) {
 
-        exigirEquipo(emailSolicitante);
+        exigirDirector(emailSolicitante);
 
         return historialRepositorio.listar().stream()
                 .filter(c -> c.getEmailCliente().equalsIgnoreCase(limpio(emailCliente)))
@@ -315,23 +316,23 @@ public class ClienteService {
         return cliente;
     }
 
-    private Usuario exigirEquipo(String email) {
+    private Usuario exigirDirector(String email) {
 
         Usuario usuario = email == null ? null : usuarioRepositorio.buscarPorEmail(limpio(email));
 
-        if (usuario == null || !usuario.isActivo() || usuario.getRol() == Rol.CLIENTE) {
-            throw new UsuarioException("Solo el asesor o el director comercial pueden hacer esto");
+        if (usuario == null || !usuario.isActivo() || usuario.getRol() != Rol.DIRECTOR_COMERCIAL) {
+            throw new UsuarioException("Solo el director comercial puede consultar o cambiar los datos financieros de un cliente");
         }
 
         return usuario;
     }
 
-    private void exigirClienteOEquipo(Cliente cliente, String emailSolicitante) {
+    private void exigirClienteODirector(Cliente cliente, String emailSolicitante) {
 
         if (emailSolicitante != null && cliente.getEmail().equalsIgnoreCase(limpio(emailSolicitante))) {
             return;
         }
 
-        exigirEquipo(emailSolicitante);
+        exigirDirector(emailSolicitante);
     }
 }

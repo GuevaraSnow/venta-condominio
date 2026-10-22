@@ -8,7 +8,7 @@ import DatosFinancieros from "./DatosFinancieros";
 
 const PESTANAS_POR_ROL = {
   CLIENTE: ["unidades", "recorridos", "cotizaciones", "reservas", "perfil"],
-  ASESOR_COMERCIAL: ["unidades", "recorridos", "cotizaciones", "reservas", "clientes", "perfil"],
+  ASESOR_COMERCIAL: ["unidades", "recorridos", "cotizaciones", "reservas", "perfil"],
   DIRECTOR_COMERCIAL: ["unidades", "crear", "recorridos", "cotizaciones", "reservas", "clientes", "perfil"],
 };
 
@@ -1215,7 +1215,7 @@ function App() {
                       <label>Dinero disponible para la cuota inicial</label>
                       <small className="input-ayuda">
                         La cuota inicial es el 30 % del precio de la vivienda. Después de
-                        registrarte, solo tu asesor puede cambiar este valor y tus ingresos.
+                        registrarte, solo el director comercial puede cambiar este valor y tus ingresos.
                       </small>
                       <input
                           type="text"

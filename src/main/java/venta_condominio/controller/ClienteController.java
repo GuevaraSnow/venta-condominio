@@ -63,7 +63,7 @@ public class ClienteController {
         return ResponseEntity.ok(clienteService.listarResumen());
     }
 
-    /** Salario y presupuesto actuales del cliente (equipo comercial o el mismo cliente). */
+    /** Salario y presupuesto actuales del cliente (director comercial o el mismo cliente). */
     @GetMapping("/{emailCliente}/datos-financieros")
     public ResponseEntity<?> datosFinancieros(@PathVariable String emailCliente,
                                               @RequestParam(required = false) String email) {
@@ -74,7 +74,7 @@ public class ClienteController {
         }
     }
 
-    /** Solo asesor o director: actualiza salario/presupuesto y deja registro en el historial. */
+    /** Solo el director comercial: actualiza salario/presupuesto y deja registro en el historial. */
     @PutMapping("/{emailCliente}/datos-financieros")
     public ResponseEntity<?> actualizarDatosFinancieros(@PathVariable String emailCliente,
                                                         @RequestBody DatosFinancierosRequest request) {

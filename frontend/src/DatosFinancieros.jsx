@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { API_URL } from "./api";
 
 // =========================================================
-// Datos financieros de los clientes (asesor / director)
+// Datos financieros de los clientes (solo director comercial)
 // - El cliente declara salario y presupuesto (cuota inicial) al registrarse
 //   y NO puede cambiarlos.
-// - Solo el equipo comercial los actualiza, después de revisar soportes.
+// - Solo el director comercial los actualiza, después de revisar soportes.
 // - Cada cambio queda en el historial (quién, cuándo, antes, después, soporte).
 // =========================================================
 
@@ -98,7 +98,7 @@ export default function DatosFinancieros({ usuario }) {
       <h2>Datos financieros de clientes</h2>
       <p className="df-intro">
         Los ingresos del hogar y el dinero disponible para la cuota inicial los declara el cliente al
-        registrarse. Solo el equipo comercial puede actualizarlos, con un soporte.
+        registrarse. Solo el director comercial puede actualizarlos, con un soporte.
       </p>
 
       <div className="input-group">

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Registro de auditoría: cada vez que un asesor o el director cambia el salario
+ * Registro de auditoría: cada vez que el director comercial cambia el salario
  * o el presupuesto de un cliente queda quién, cuándo, qué valores había antes,
  * cuáles quedaron y el soporte que lo justifica.
  */
