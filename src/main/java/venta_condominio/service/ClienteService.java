@@ -298,6 +298,11 @@ public class ClienteService {
             fila.put("cuotaInicial", r.cuotaInicial());
             fila.put("cuotaMensual", r.cuotaMensual());
             fila.put("salarioMinimo", r.salarioMinimo());
+            fila.put("alcanzaCuotaInicial", r.alcanzaCuotaInicial());
+            fila.put("alcanzaIngresos", r.alcanzaCuotaMensual());
+            fila.put("faltanteCuotaInicial", r.faltanteCuotaInicial());
+            fila.put("faltanteIngresos", r.faltanteIngresos());
+            fila.put("motivos", r.motivos());
             fila.put("motivo", r.motivo());
             resultado.add(fila);
         }

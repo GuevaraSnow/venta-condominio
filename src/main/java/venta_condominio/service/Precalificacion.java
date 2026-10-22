@@ -53,18 +53,42 @@ public final class Precalificacion {
             return alcanzaCuotaInicial && alcanzaCuotaMensual;
         }
 
-        /** Explica por qué no pasa (null si pasa). */
-        public String motivo() {
+        /** Cuánto dinero le falta para la cuota inicial (0 si le alcanza). */
+        public BigDecimal faltanteCuotaInicial() {
+            return alcanzaCuotaInicial ? BigDecimal.ZERO : cuotaInicial.subtract(presupuesto);
+        }
+
+        /** Cuántos ingresos mensuales le faltan (0 si le alcanzan). */
+        public BigDecimal faltanteIngresos() {
+            return alcanzaCuotaMensual ? BigDecimal.ZERO : salarioMinimo.subtract(salario);
+        }
+
+        /** Cada motivo por el que no precalifica, por separado (vacía si pasa). */
+        public java.util.List<String> motivos() {
+
+            java.util.List<String> motivos = new java.util.ArrayList<>();
+
             if (!alcanzaCuotaInicial) {
-                return "La cuota inicial (" + CotizacionService.pesos(cuotaInicial)
-                        + ") supera el presupuesto disponible (" + CotizacionService.pesos(presupuesto) + ")";
+                motivos.add("Cuota inicial: se necesitan " + CotizacionService.pesos(cuotaInicial)
+                        + " y el cliente tiene " + CotizacionService.pesos(presupuesto)
+                        + " (faltan " + CotizacionService.pesos(faltanteCuotaInicial()) + ")");
             }
+
             if (!alcanzaCuotaMensual) {
-                return "La cuota mensual estimada (" + CotizacionService.pesos(cuotaMensual)
-                        + ") supera el 30 % de los ingresos del hogar; se requieren ingresos de al menos "
-                        + CotizacionService.pesos(salarioMinimo);
+                motivos.add("Ingresos: la cuota mensual estimada de " + CotizacionService.pesos(cuotaMensual)
+                        + " supera el 30 % de los ingresos del hogar; se requieren "
+                        + CotizacionService.pesos(salarioMinimo) + " y el cliente tiene "
+                        + CotizacionService.pesos(salario)
+                        + " (faltan " + CotizacionService.pesos(faltanteIngresos()) + ")");
             }
-            return null;
+
+            return motivos;
+        }
+
+        /** Todos los motivos en un solo texto (null si pasa). */
+        public String motivo() {
+            java.util.List<String> motivos = motivos();
+            return motivos.isEmpty() ? null : String.join(". ", motivos);
         }
     }
 

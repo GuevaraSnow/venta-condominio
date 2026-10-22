@@ -191,7 +191,8 @@ class CotizacionServiceTest {
         cambiarCifras("8000000", "50000000"); // cuota inicial de APT-801 = 85.500.000
 
         ValidacionCotizacionException e = assertThrows(ValidacionCotizacionException.class, () -> crear("0"));
-        assertTrue(e.getMessage().contains("cuota inicial"));
+        assertTrue(e.getMessage().contains("Cuota inicial"));
+        assertFalse(e.getMessage().contains("Ingresos"));
     }
 
     @Test
@@ -199,7 +200,20 @@ class CotizacionServiceTest {
         cambiarCifras("3000000", "90000000");
 
         ValidacionCotizacionException e = assertThrows(ValidacionCotizacionException.class, () -> crear("0"));
-        assertTrue(e.getMessage().contains("ingresos"));
+        assertTrue(e.getMessage().contains("Ingresos"));
+        assertFalse(e.getMessage().contains("Cuota inicial"));
+    }
+
+    @Test
+    void siFallanAmbasCondicionesExplicaLasDos() {
+        cambiarCifras("3000000", "50000000");
+
+        Cliente cliente = clientes.buscarPorEmail(CLIENTE);
+        Precalificacion.Resultado r = Precalificacion.evaluar(cliente, new BigDecimal("285000000"), BigDecimal.ZERO);
+
+        assertEquals(2, r.motivos().size());
+        assertEquals(new BigDecimal("35500000"), r.faltanteCuotaInicial()); // 85,5 M - 50 M
+        assertTrue(r.faltanteIngresos().signum() > 0);
     }
 
     @Test

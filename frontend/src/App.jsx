@@ -1526,8 +1526,33 @@ function App() {
                                                 {" · cuota aprox. "}
                                                 {formatearPrecio(alcance[unidad.identificador].cuotaMensual)}/mes
                                                 {!alcance[unidad.identificador].alcanza && (
-                                                    <span className="unit-alcance-motivo">
-                                                      {alcance[unidad.identificador].motivo}
+                                                    <span className="unit-alcance-motivos">
+                                                      {!alcance[unidad.identificador].alcanzaCuotaInicial && (
+                                                          <span className="unit-alcance-motivo">
+                                                            ✗ Cuota inicial: necesitas{" "}
+                                                            {formatearPrecio(alcance[unidad.identificador].cuotaInicial)}
+                                                            {" — te faltan "}
+                                                            {formatearPrecio(alcance[unidad.identificador].faltanteCuotaInicial)}
+                                                          </span>
+                                                      )}
+                                                      {!alcance[unidad.identificador].alcanzaIngresos && (
+                                                          <span className="unit-alcance-motivo">
+                                                            ✗ Ingresos del hogar: necesitas{" "}
+                                                            {formatearPrecio(alcance[unidad.identificador].salarioMinimo)}
+                                                            /mes — te faltan{" "}
+                                                            {formatearPrecio(alcance[unidad.identificador].faltanteIngresos)}
+                                                          </span>
+                                                      )}
+                                                      {alcance[unidad.identificador].alcanzaCuotaInicial && (
+                                                          <span className="unit-alcance-motivo">
+                                                            ✓ Cuota inicial: te alcanza
+                                                          </span>
+                                                      )}
+                                                      {alcance[unidad.identificador].alcanzaIngresos && (
+                                                          <span className="unit-alcance-motivo">
+                                                            ✓ Ingresos del hogar: te alcanzan
+                                                          </span>
+                                                      )}
                                                     </span>
                                                 )}
                                               </p>
