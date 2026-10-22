@@ -828,27 +828,81 @@ button {
 
 /* ---- Datos financieros de clientes ---- */
 .df-view {
-  display: grid;
-  gap: 16px;
-}
-
-.df-tabla {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
+  min-width: 0;
+  text-align: left;
 }
 
-.df-tabla th,
-.df-tabla td {
-  text-align: left;
-  padding: 6px 8px;
-  border-bottom: 1px solid rgba(127, 127, 127, 0.25);
+.df-view h2,
+.df-view h3 {
+  color: #252a35;
+  margin: 0;
+}
+
+.df-view h2 {
+  font-size: 1.25rem;
+}
+
+.df-view h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+
+.df-intro {
+  font-size: 0.9rem;
+  color: #5b6475;
+}
+
+.df-view .input-group {
+  min-width: 0;
+}
+
+.df-view select,
+.df-view input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+
+.df-actuales {
+  font-size: 0.9rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: #f3f5f9;
+  color: #252a35;
 }
 
 .df-form {
-  display: grid;
-  gap: 10px;
-  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.df-historial {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.df-cambio {
+  border: 1px solid #e7eaf0;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+  color: #252a35;
+  overflow-wrap: anywhere;
+}
+
+.df-cambio-fecha {
+  color: #5b6475;
+  font-size: 0.8rem;
 }
 
 .df-ok {

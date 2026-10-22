@@ -96,7 +96,7 @@ export default function DatosFinancieros({ usuario }) {
   return (
     <div className="df-view">
       <h2>Datos financieros de clientes</h2>
-      <p>
+      <p className="df-intro">
         Los ingresos del hogar y el dinero disponible para la cuota inicial los declara el cliente al
         registrarse. Solo el equipo comercial puede actualizarlos, con un soporte.
       </p>
@@ -118,7 +118,7 @@ export default function DatosFinancieros({ usuario }) {
 
       {actuales && (
         <form className="df-form" onSubmit={guardar}>
-          <p>
+          <p className="df-actuales">
             Actual: ingresos del hogar <strong>{pesos(actuales.salario)}</strong> · cuota inicial disponible{" "}
             <strong>{pesos(actuales.presupuesto)}</strong>
           </p>
@@ -168,32 +168,23 @@ export default function DatosFinancieros({ usuario }) {
           {historial.length === 0 ? (
             <p>Sin cambios: conserva los datos que declaró al registrarse.</p>
           ) : (
-            <table className="df-tabla">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Ingresos del hogar</th>
-                  <th>Cuota inicial disponible</th>
-                  <th>Hecho por</th>
-                  <th>Soporte</th>
-                </tr>
-              </thead>
-              <tbody>
-                {historial.map((c) => (
-                  <tr key={c.id}>
-                    <td>{String(c.fecha).replace("T", " ")}</td>
-                    <td>
-                      {pesos(c.salarioAnterior)} → {pesos(c.salarioNuevo)}
-                    </td>
-                    <td>
-                      {pesos(c.presupuestoAnterior)} → {pesos(c.presupuestoNuevo)}
-                    </td>
-                    <td>{c.modificadoPor}</td>
-                    <td>{c.motivo}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="df-historial">
+              {historial.map((c) => (
+                <div key={c.id} className="df-cambio">
+                  <div className="df-cambio-fecha">
+                    {String(c.fecha).replace("T", " ")} · {c.modificadoPor}
+                  </div>
+                  <div>
+                    Ingresos del hogar: {pesos(c.salarioAnterior)} → {pesos(c.salarioNuevo)}
+                  </div>
+                  <div>
+                    Cuota inicial disponible: {pesos(c.presupuestoAnterior)} →{" "}
+                    {pesos(c.presupuestoNuevo)}
+                  </div>
+                  <div>Soporte: {c.motivo}</div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
