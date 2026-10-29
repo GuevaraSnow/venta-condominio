@@ -164,10 +164,6 @@ Para reforzar la verificación de la intervención y del flujo analizado, se rec
 
 Las pruebas adicionales son recomendaciones; no se afirma que se hayan ejecutado.
 
-### 6.4. Limitaciones
-
-No se suministró una arquitectura formal ni una especificación completa de requisitos para contrastar toda la implementación. Por esta razón, los hallazgos se fundamentan en la inspección del código fuente disponible y deben interpretarse dentro de ese alcance.
-
 ## 7. Cierre y deuda técnica pendiente
 
 La intervención realizada elimina un método privado sin uso identificado en `CotizacionService`, con un alcance reducido y sin cambios intencionales en las reglas de negocio. La ejecución de `.\gradlew.bat test` terminó con `BUILD SUCCESSFUL`.
