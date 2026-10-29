@@ -177,21 +177,3 @@ El hallazgo de mayor prioridad continúa siendo la consistencia entre el guardad
 También se recomienda evaluar el efecto de escritura que ocurre durante el listado de cotizaciones, teniendo en cuenta que el comportamiento está descrito como intencional en el código existente.
 
 Como práctica preventiva, se recomienda combinar revisión de código, pruebas automatizadas, pruebas de integración y validación de concurrencia para las operaciones que modifican varios recursos relacionados.
-
-## 8. Git y trazabilidad
-
-Los siguientes mensajes de commit se proponen para registrar los cambios en el repositorio:
-
-1. `docs: registrar diagnostico tecnico`
-2. `refactor: eliminar metodo auxiliar sin uso en cotizaciones`
-3. `docs: documentar verificacion de refactorizacion`
-
-Los mensajes anteriores son propuestas y no representan commits ya creados. Después de registrar los cambios, se deben completar los hashes reales de Git y, si corresponde, los enlaces a los commits.
-
-| Cambio | Mensaje propuesto | Hash real |
-|---|---|---|
-| Registro del diagnóstico | `docs: registrar diagnostico tecnico` | Completar después del commit |
-| Eliminación del método sin uso | `refactor: eliminar metodo auxiliar sin uso en cotizaciones` | Completar después del commit |
-| Registro de la verificación | `docs: documentar verificacion de refactorizacion` | Completar después del commit |
-
-La trazabilidad final debe reflejar únicamente los cambios que efectivamente estén registrados en el repositorio.
