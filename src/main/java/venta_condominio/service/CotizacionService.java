@@ -51,10 +51,7 @@ public class CotizacionService extends PublicadorEventos {
     /** Permite fijar "hoy" en las pruebas. */
     private Supplier<LocalDate> hoy = LocalDate::now;
 
-    public CotizacionService(CotizacionRepositorio cotizacionRepositorio,
-                             UnidadRepositorio unidadRepositorio,
-                             ClienteRepositorio clienteRepositorio,
-                             UsuarioRepositorio usuarioRepositorio) {
+    public CotizacionService(CotizacionRepositorio cotizacionRepositorio,UnidadRepositorio unidadRepositorio,ClienteRepositorio clienteRepositorio,UsuarioRepositorio usuarioRepositorio) {
         this.cotizacionRepositorio = cotizacionRepositorio;
         this.unidadRepositorio = unidadRepositorio;
         this.clienteRepositorio = clienteRepositorio;
@@ -292,11 +289,6 @@ public class CotizacionService extends PublicadorEventos {
         }
 
         throw new ValidacionCotizacionException(mensaje);
-    }
-
-    private static String nombreCompleto(Cliente cliente) {
-        return (cliente.getNombre() + " " + cliente.getPrimerApellido() + " "
-                + (cliente.getSegundoApellido() == null ? "" : cliente.getSegundoApellido())).trim();
     }
 
     static String pesos(BigDecimal valor) {
